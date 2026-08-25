@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolo — Text ko Awaaz Do</title>
+<style>
+:root{--ink:#232019;--paper:#f7f3ea;--panel:#fffdf8;--line:#e2d9c7;--accent:#2f5d50;--accent-soft:#e5efec;--clay:#b8602f}
+[data-theme="dark"]{--ink:#f2ede0;--paper:#161512;--panel:#1e1c17;--line:#37342a;--accent:#7fbfa8;--accent-soft:#22322c;--clay:#e2925a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:Georgia,serif;padding:20px;min-height:100vh;transition:all .3s}
+.wrap{max-width:650px;margin:0 auto}
+h1{font-size:30px;margin-bottom:5px}
+h1 em{color:var(--accent)}
+.sub{font-size:13px;color:#888;margin-bottom:20px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:20px}
+textarea{width:100%;height:150px;padding:12px;font-size:16px;border:1px solid var(--line);border-radius:5px;margin:10px 0;background:var(--paper);color:var(--ink);font-family:Georgia,serif}
+select,input[type=text],input[type=number]{width:100%;padding:10px;border:1px solid var(--line);border-radius:5px;margin:5px 0;background:var(--paper);color:var(--ink);font-size:14px}
+button{padding:10px 20px;border:none;border-radius:5px;cursor:pointer;font-size:14px;background:var(--accent);color:white;margin:5px}
+button.secondary{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+button:hover{opacity:0.8}
+.status{font-size:13px;margin:8px 0;color:var(--accent);min-height:20px}
+.status.err{color:#c00}
+.row{display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap}
+label{font-size:12px;font-weight:bold;display:block;margin-top:10px;color:var(--accent)}
+.dropzone{border:2px dashed var(--line);padding:20px;text-align:center;border-radius:5px;margin:10px 0;cursor:pointer}
+.dropzone:hover{border-color:var(--accent);background:var(--accent-soft)}
+.history-item{padding:10px;border:1px solid var(--line);margin:5px 0;cursor:pointer;border-radius:5px;font-size:13px}
+.history-item:hover{background:var(--accent-soft)}
+.note{background:var(--accent-soft);padding:12px;border-radius:5px;font-size:12px;margin:10px 0;border-left:3px solid var(--accent)}
+.waveform{display:flex;gap:4px;height:30px;align-items:center;justify-content:center;margin:10px 0}
+.waveform span{width:3px;background:var(--accent);height:8px;animation:wave 1s infinite}
+.waveform span:nth-child(2){animation-delay:.1s}
+.waveform span:nth-child(3){animation-delay:.2s}
+.waveform span:nth-child(4){animation-delay:.3s}
+.waveform span:nth-child(5){animation-delay:.4s}
+@keyframes wave{0%,100%{height:8px}50%{height:25px}}
+audio{width:100%;margin:10px 0;display:none}
+audio.active{display:block}
+.badge{display:inline-block;padding:4px 10px;border:1px solid var(--accent);border-radius:15px;font-size:11px;margin:2px;color:var(--accent)}
+.theme-btn{position:fixed;top:10px;right:10px;background:var(--accent);color:white;padding:8px 12px;border-radius:5px;cursor:pointer;font-size:12px;border:none}
+.cors-notice{background:#fff3cd;border:1px solid #ffc107;padding:10px;border-radius:5px;margin:10px 0;display:none;font-size:13px}
+</style>
+</head>
+<body>
+
+<button class="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
+
+<div class="wrap">
+    <h1>Text ko <em>awaaz</em> do</h1>
+    <p class="sub">Likho, suno, download karo — sab free!</p>
+    
+    <div>
+        <span class="badge">Hindi</span>
+        <span class="badge">English</span>
+        <span class="badge">MP3 Download</span>
+    </div>
+
+    <!-- TEXT INPUT PANEL -->
+    <div class="panel">
+        <h3 style="color:var(--accent)">📝 Apna Text</h3>
+        <textarea id="textInput" placeholder="Yahan text paste karo..."></textarea>
+        
+        <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+            📁 .txt file upload karne ke liye click karo
+            <input type="file" id="fileInput" accept=".txt" style="display:none">
+            <div id="fileName" style="font-size:12px;color:var(--accent)"></div>
+        </div>
+        
+        <div style="text-align:right;font-size:12px;color:#888">
+            <span id="charCount">0 characters</span>
+        </div>
+
+        <div class="row">
+            <div style="flex:1">
+                <label>Language</label>
+                <select id="lang">
+                    <option value="hi-IN">Hindi</option>
+                    <option value="en-IN">English (India)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                </select>
+            </div>
+            <div style="flex:1">
+                <label>Speed: <span id="rateVal">1.0x</span></label>
+                <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" style="width:100%">
+            </div>
+        </div>
+
+        <div class="row">
+            <div style="flex:1">
+                <label>Target Time (seconds)</label>
+                <input type="number" id="targetSec" placeholder="Optional" min="1">
+            </div>
+            <button onclick="autoSpeed()" class="secondary">⏱ Auto Speed</button>
+        </div>
+
+        <div class="row">
+            <div style="flex:1">
+                <label>Voice Gender</label>
+                <select id="voiceGender">
+                    <option value="any">Any</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                </select>
+            </div>
+            <div style="flex:1">
+                <label>Available Voices</label>
+                <select id="voicePick"></select>
+            </div>
+        </div>
+
+        <div class="waveform" id="waveform" style="display:none">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="row">
+            <button onclick="speak()">▶ Sunao</button>
+            <button onclick="pauseSpeak()" class="secondary">⏸ Pause</button>
+            <button onclick="stopSpeak()" class="secondary">⏹ Stop</button>
+        </div>
+        
+        <div class="status" id="playStatus"></div>
+        
+        <div id="history"></div>
+    </div>
+
+    <!-- MP3 DOWNLOAD PANEL -->
+    <div class="panel">
+        <h3 style="color:var(--accent)">💾 MP3 Download</h3>
+        
+        <div class="note">
+            MP3 download ke liye free API key chahiye. registration karke Mil jaega Safe hai
+            <a href="https://www.voicerss.org/registration.aspx" target="_blank" style="color:var(--accent)">
+                Yahan se free key lo
+            </a> (30 second ka kaam)
+        </div>
+        
+        <div class="cors-notice" id="corsNotice">
+            ⚠️ CORS error? Install a CORS-disabling browser extension (e.g., Moesif CORS) and refresh.
+        </div>
+        
+        <input type="text" id="apiKey" placeholder="API key yahan paste karo" style="margin:10px 0">
+        <button onclick="saveKey()" class="secondary">💾 Save Key</button>
+        <div id="keyStatus" style="font-size:12px;color:var(--accent)"></div>
+        
+        <label>Download Voice</label>
+        <select id="dlGender">
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+        </select>
+        
+        <button onclick="downloadMP3()" style="width:100%;margin-top:10px">⬇ MP3 Download</button>
+        
+        <div class="status" id="dlStatus"></div>
+        <audio id="player" controls></audio>
+    </div>
+</div>
+
+<script>
+// ============ COMPLETE APP (Direct Fetch – needs CORS disabled) ============
+let voices = [];
+let utterance = null;
+let currentVoiceMatches = [];
+
+function init() {
+    loadVoices();
+    loadHistory();
+    loadKey();
+    updateCharCount();
+    
+    document.getElementById('textInput').addEventListener('input', updateCharCount);
+    document.getElementById('rate').addEventListener('input', updateRate);
+    document.getElementById('lang').addEventListener('change', populateVoices);
+    document.getElementById('voiceGender').addEventListener('change', populateVoices);
+    document.getElementById('fileInput').addEventListener('change', handleFile);
+    
+    setTimeout(loadVoices, 500);
+}
+
+function updateCharCount() {
+    document.getElementById('charCount').textContent = 
+        document.getElementById('textInput').value.length + ' characters';
+}
+
+function updateRate() {
+    document.getElementById('rateVal').textContent = 
+        parseFloat(document.getElementById('rate').value).toFixed(1) + 'x';
+}
+
+function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+}
+
+function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.txt')) {
+        document.getElementById('fileName').textContent = 'Sirf .txt file';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        document.getElementById('textInput').value = ev.target.result;
+        updateCharCount();
+        document.getElementById('fileName').textContent = '✓ ' + file.name;
+    };
+    reader.readAsText(file);
+}
+
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+    populateVoices();
+}
+window.speechSynthesis.onvoiceschanged = loadVoices;
+
+function guessGender(name) {
+    const n = name.toLowerCase();
+    const maleNames = ['madhur','hemant','prabhat','ravi','kabir','amit','rishi','ajit','vikram','male','john','mike','david'];
+    const femaleNames = ['swara','priya','neerja','kajal','aditi','puja','eka','heera','female','linda','susan','mary'];
+    if (maleNames.some(h => n.includes(h))) return 'male';
+    if (femaleNames.some(h => n.includes(h))) return 'female';
+    return 'unknown';
+}
+
+function populateVoices() {
+    const lang = document.getElementById('lang').value;
+    const gender = document.getElementById('voiceGender').value;
+    const langPrefix = lang.split('-')[0];
+    let matches = voices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
+    matches.sort((a, b) => (!a.localService && b.localService) ? -1 : (a.localService && !b.localService) ? 1 : 0);
+    if (gender !== 'any') {
+        const filtered = matches.filter(v => guessGender(v.name) === gender);
+        if (filtered.length > 0) matches = filtered;
+    }
+    currentVoiceMatches = matches;
+    const select = document.getElementById('voicePick');
+    select.innerHTML = '';
+    if (matches.length === 0) {
+        select.innerHTML = '<option>No voice available</option>';
+        return;
+    }
+    matches.forEach((voice, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = voice.name + (voice.localService ? '' : ' ⭐');
+        select.appendChild(option);
+    });
+}
+
+function speak() {
+    const text = document.getElementById('textInput').value.trim();
+    const status = document.getElementById('playStatus');
+    if (!text) {
+        status.textContent = 'Pehle kuch text likho';
+        status.className = 'status err';
+        return;
+    }
+    if (currentVoiceMatches.length === 0) {
+        status.textContent = 'Is browser mein voice available nahi hai. Chrome ya Edge try karo.';
+        status.className = 'status err';
+        return;
+    }
+    window.speechSynthesis.cancel();
+    utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = document.getElementById('lang').value;
+    utterance.rate = parseFloat(document.getElementById('rate').value);
+    const voiceIndex = parseInt(document.getElementById('voicePick').value);
+    if (currentVoiceMatches[voiceIndex]) {
+        utterance.voice = currentVoiceMatches[voiceIndex];
+    }
+    utterance.onstart = function() {
+        status.textContent = 'Bol raha hoon...';
+        status.className = 'status';
+        document.getElementById('waveform').style.display = 'flex';
+        saveHistory(text);
+    };
+    utterance.onend = function() {
+        status.textContent = 'Khatam ✓';
+        document.getElementById('waveform').style.display = 'none';
+    };
+    utterance.onerror = function() {
+        status.textContent = 'Error - Chrome/Edge try karo';
+        status.className = 'status err';
+        document.getElementById('waveform').style.display = 'none';
+    };
+    window.speechSynthesis.speak(utterance);
+}
+
+function pauseSpeak() {
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.pause();
+        document.getElementById('playStatus').textContent = 'Paused';
+    } else if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        document.getElementById('playStatus').textContent = 'Bol raha hoon...';
+    }
+}
+
+function stopSpeak() {
+    window.speechSynthesis.cancel();
+    document.getElementById('playStatus').textContent = 'Stopped';
+    document.getElementById('waveform').style.display = 'none';
+}
+
+function autoSpeed() {
+    const text = document.getElementById('textInput').value.trim();
+    const target = parseFloat(document.getElementById('targetSec').value);
+    const status = document.getElementById('playStatus');
+    if (!text) {
+        status.textContent = 'Pehle text likho';
+        status.className = 'status err';
+        return;
+    }
+    if (!target || target <= 0) {
+        status.textContent = 'Target seconds daalo';
+        status.className = 'status err';
+        return;
+    }
+    const wordsPerSecond = 2.5;
+    const words = text.split(' ').length;
+    const normalDuration = words / wordsPerSecond;
+    let neededRate = normalDuration / target;
+    const clamped = Math.min(2, Math.max(0.5, neededRate));
+    document.getElementById('rate').value = clamped;
+    document.getElementById('rateVal').textContent = clamped.toFixed(1) + 'x';
+    status.textContent = 'Speed ' + clamped.toFixed(1) + 'x set ki';
+    status.className = 'status';
+}
+
+function saveHistory(text) {
+    let history = JSON.parse(localStorage.getItem('history') || '[]');
+    history = history.filter(item => item !== text);
+    history.unshift(text);
+    history = history.slice(0, 5);
+    localStorage.setItem('history', JSON.stringify(history));
+    loadHistory();
+}
+
+function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('history') || '[]');
+    const historyDiv = document.getElementById('history');
+    historyDiv.innerHTML = '';
+    history.forEach(text => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.textContent = text.slice(0, 60) + (text.length > 60 ? '...' : '');
+        div.onclick = function() {
+            document.getElementById('textInput').value = text;
+            updateCharCount();
+        };
+        historyDiv.appendChild(div);
+    });
+}
+
+function loadKey() {
+    const key = localStorage.getItem('api_key');
+    if (key) {
+        document.getElementById('apiKey').value = key;
+        document.getElementById('keyStatus').textContent = '✓ Key saved';
+    }
+}
+
+function saveKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    if (key) {
+        localStorage.setItem('api_key', key);
+        document.getElementById('keyStatus').textContent = '✓ Key saved';
+    }
+}
+
+// ============================================
+// 🔥 MP3 Download – Direct fetch (needs CORS disabled)
+// ============================================
+async function downloadMP3() {
+    const text = document.getElementById('textInput').value.trim();
+    const key = localStorage.getItem('api_key');
+    const status = document.getElementById('dlStatus');
+    const lang = document.getElementById('lang').value;
+    const gender = document.getElementById('dlGender').value;
+    
+    if (!text) {
+        status.textContent = 'Pehle text likho';
+        status.className = 'status err';
+        return;
+    }
+    if (!key) {
+        status.textContent = 'API key save karo';
+        status.className = 'status err';
+        return;
+    }
+    
+    const voiceMap = {
+        'hi-IN': { female: 'Puja', male: 'Kabir' },
+        'en-IN': { female: 'Eka', male: 'Ajit' },
+        'en-US': { female: 'Linda', male: 'John' },
+        'en-GB': { female: 'Alice', male: 'Harry' }
+    };
+    const voiceName = voiceMap[lang][gender];
+    const rate = document.getElementById('rate').value;
+    const rssRate = Math.round((rate - 1) * 10);
+    
+    status.textContent = 'Audio ban raha hai...';
+    status.className = 'status';
+    
+    try {
+        const targetUrl = `https://api.voicerss.org/?key=${key}&hl=${lang}&v=${voiceName}&r=${rssRate}&c=MP3&f=44khz_16bit_stereo&src=${encodeURIComponent(text)}`;
+        
+        // Direct fetch – no proxy. Works only if CORS is disabled.
+        const response = await fetch(targetUrl);
+        
+        if (!response.ok) {
+            // If CORS error, response will not be ok; catch block will handle.
+            throw new Error('Server error: ' + response.status);
+        }
+        
+        const blob = await response.blob();
+        if (blob.type === 'text/html' || blob.size < 500) {
+            const textResponse = await blob.text();
+            if (textResponse.includes('Invalid API key') || textResponse.includes('Error')) {
+                throw new Error('API key galat hai. Check karo.');
+            } else {
+                throw new Error('Server error. Try again later.');
+            }
+        }
+        
+        const audioUrl = URL.createObjectURL(blob);
+        const player = document.getElementById('player');
+        player.src = audioUrl;
+        player.classList.add('active');
+        const a = document.createElement('a');
+        a.href = audioUrl;
+        a.download = 'bolo.mp3';
+        a.click();
+        status.textContent = '✓ Download ho gaya!';
+        status.className = 'status';
+        
+    } catch (error) {
+        // If it's a CORS error, show the notice.
+        if (error.message.includes('fetch') || error.message.includes('CORS') || error.message.includes('NetworkError')) {
+            document.getElementById('corsNotice').style.display = 'block';
+            status.textContent = 'CORS error – please install a CORS-disabling extension.';
+        } else {
+            status.textContent = 'Error: ' + error.message;
+        }
+        status.className = 'status err';
+    }
+}
+
+init();
+</script>
+</body>
+</html>

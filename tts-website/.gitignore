@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+backend/temp/*.mp3
+.env
+.venv/
+node_modules/
+.DS_Store

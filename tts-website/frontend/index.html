@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Text to Speech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="bg-decor">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+    <div class="grain"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="logo-badge">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 5L6 9H2V15H6L11 19V5Z" fill="currentColor"/>
+          <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M18.36 5.64C20.0975 7.37764 21.0748 9.73443 21.0748 12.195C21.0748 14.6556 20.0975 17.0124 18.36 18.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      </div>
+      <h1>Free Text to Speech</h1>
+      <p class="subtitle">Paste text or upload a transcript. Choose a voice. Download studio-quality audio.</p>
+    </header>
+
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="text-tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h10M4 18h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Paste Text
+      </button>
+      <button class="tab-btn" data-tab="file-tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0-12l4 4m-4-4L8 7M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Upload Transcript
+      </button>
+      <span class="tab-indicator" id="tab-indicator"></span>
+    </div>
+
+    <div id="text-tab" class="tab-content active">
+      <div class="textarea-wrap">
+        <textarea id="text-input" placeholder="Paste or type your text here..." rows="8" maxlength="5000"></textarea>
+        <span class="char-count"><span id="char-count">0</span> / 5000</span>
+      </div>
+    </div>
+
+    <div id="file-tab" class="tab-content">
+      <label for="file-input" class="file-drop" id="file-drop">
+        <svg class="file-drop-icon" width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3v12m0-12l4 4m-4-4L8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="file-name">Drop a file here, or <u>click to browse</u></span>
+        <span class="file-drop-hint">Supports .txt · .srt · .vtt</span>
+      </label>
+      <input type="file" id="file-input" accept=".txt,.srt,.vtt" hidden />
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="language-select">Language</label>
+        <div class="select-wrap">
+          <select id="language-select"></select>
+          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="voice-select">Voice</label>
+        <div class="select-wrap">
+          <select id="voice-select"></select>
+          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="rate-select">Speed</label>
+        <div class="select-wrap">
+          <select id="rate-select">
+            <option value="-25%">Slower</option>
+            <option value="+0%" selected>Normal</option>
+            <option value="+25%">Faster</option>
+          </select>
+          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-secondary">
+      <div class="control-group grow">
+        <label for="target-time-input">Target Time (seconds)</label>
+        <input type="number" id="target-time-input" class="target-time-input" placeholder="Optional" min="1" step="1" />
+      </div>
+
+      <button type="button" id="auto-speed-btn" class="auto-speed-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 9v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 2h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Auto Speed
+      </button>
+    </div>
+
+    <button id="generate-btn">
+      <span class="btn-label">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg>
+        Generate Audio
+      </span>
+      <span class="btn-spinner" id="btn-spinner"></span>
+    </button>
+
+    <div id="status" class="status"></div>
+
+    <div id="player-wrap" class="player-wrap" hidden>
+      <div class="player-card">
+        <audio id="audio-player" controls></audio>
+      </div>
+      <a id="download-link" class="download-btn" download="speech.mp3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0-12l4 4m-4-4L8 7M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download MP3
+      </a>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
