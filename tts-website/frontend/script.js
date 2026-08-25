@@ -1,5 +1,5 @@
 // Point this at your backend's URL (local dev or your deployed Render/Railway URL)
-const API_BASE = 'https://tts-backend.onrender.com';
+const API_BASE = 'https://tts-backend-33xv.onrender.com';
 
 const textInput = document.getElementById("text-input");
 const fileInput = document.getElementById("file-input");
