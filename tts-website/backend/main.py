@@ -27,7 +27,7 @@ app = FastAPI(title="Free TTS API")
 # Tighten this to your real frontend URL before going to production.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://t-a-omega.vercel.app"],  # Your deployed frontend URL
+    allow_origins=["https://texttospeechin.vercel.app"],  # Your deployed frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
