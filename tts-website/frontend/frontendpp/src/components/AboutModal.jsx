@@ -11,7 +11,7 @@ function AboutModal({ isOpen, onClose }) {
           ×
         </button>
 
-        <h2>About VoiceForge</h2>
+        <h2>Support Our Team</h2>
 
         <p>
           Convert any text into natural-sounding speech using high-quality

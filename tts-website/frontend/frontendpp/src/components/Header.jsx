@@ -29,7 +29,7 @@ function Header({ darkMode, toggleDarkMode, openAbout, currentPage, setCurrentPa
           Tikri AI
         </button>
         <button className="nav-link about" onClick={openAbout}>
-          About
+          Support
         </button>
       </nav>
 
