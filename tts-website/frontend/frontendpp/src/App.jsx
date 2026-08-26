@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -12,6 +11,8 @@ import StatusMessage from './components/StatusMessage';
 import AudioPlayer from './components/AudioPlayer';
 import AboutModal from './components/AboutModal';
 import AudioAdjuster from './components/AudioAdjuster';
+import { useSoundTouch } from './hooks/useSoundTouch';
+import { blobToAudioBuffer, audioBufferToBlob } from './utils/audioUtils';
 
 function App() {
   // ---------- State ----------
@@ -39,6 +40,9 @@ function App() {
 
   const fileInputRef = useRef(null);
 
+  // SoundTouch hook
+  const { isReady: soundTouchReady, stretch } = useSoundTouch();
+
   // ---------- Load Voices ----------
   useEffect(() => {
     const API_BASE =
@@ -52,22 +56,13 @@ function App() {
       })
       .then(data => {
         setAllVoices(data);
-
         const langs = [...new Set(data.map(v => v.locale))].sort();
         setLanguageOptions(langs);
-
         if (langs.length) {
           setLanguage(langs[0]);
-
-          const voicesForLang = data.filter(
-            v => v.locale === langs[0]
-          );
-
+          const voicesForLang = data.filter(v => v.locale === langs[0]);
           setVoiceOptions(voicesForLang);
-
-          if (voicesForLang.length) {
-            setVoice(voicesForLang[0].name);
-          }
+          if (voicesForLang.length) setVoice(voicesForLang[0].name);
         }
       })
       .catch(() => {
@@ -81,60 +76,37 @@ function App() {
   // ---------- Update voices when language changes ----------
   useEffect(() => {
     if (!language || !allVoices.length) return;
-
-    const filtered = allVoices.filter(
-      v => v.locale === language
-    );
-
+    const filtered = allVoices.filter(v => v.locale === language);
     setVoiceOptions(filtered);
-
-    if (filtered.length) {
-      setVoice(filtered[0].name);
-    }
+    if (filtered.length) setVoice(filtered[0].name);
   }, [language, allVoices]);
 
-  // ---------- Generate handler ----------
+  // ---------- Generate handler (merged with SoundTouch) ----------
   const handleGenerate = async () => {
     setStatus({ message: '', type: '' });
     setAudioUrl(null);
 
+    // --- Validations ---
     if (!voice) {
-      setStatus({
-        message: 'Please select a voice.',
-        type: 'error',
-      });
+      setStatus({ message: 'Please select a voice.', type: 'error' });
       return;
     }
-
     if (activeTab === 'text-tab' && !text.trim()) {
-      setStatus({
-        message: 'Please paste some text first.',
-        type: 'error',
-      });
+      setStatus({ message: 'Please paste some text first.', type: 'error' });
       return;
     }
-
     if (activeTab === 'file-tab' && !file) {
-      setStatus({
-        message: 'Please choose a transcript file first.',
-        type: 'error',
-      });
+      setStatus({ message: 'Please choose a transcript file first.', type: 'error' });
       return;
     }
-
     if (autoSpeed && !targetTime) {
-      setStatus({
-        message: 'Enter a target time, or turn off Auto Speed.',
-        type: 'error',
-      });
+      setStatus({ message: 'Enter a target time, or turn off Auto Speed.', type: 'error' });
       return;
     }
 
     setLoading(true);
-
     setStatus({
-      message:
-        'Generating audio... this can take a few seconds for long text.',
+      message: 'Generating audio... this can take a few seconds for long text.',
       type: '',
     });
 
@@ -144,27 +116,22 @@ function App() {
         'https://tts-backend-33xv.onrender.com';
 
       const formData = new FormData();
-
       formData.append('voice', voice);
       formData.append('rate', rate);
       formData.append('auto_speed', String(autoSpeed));
-
       if (autoSpeed) {
         formData.append('target_time', targetTime);
       }
 
       let response;
-
       if (activeTab === 'text-tab') {
         formData.append('text', text);
-
         response = await fetch(`${API_BASE}/generate`, {
           method: 'POST',
           body: formData,
         });
       } else {
         formData.append('file', file);
-
         response = await fetch(`${API_BASE}/generate-from-file`, {
           method: 'POST',
           body: formData,
@@ -173,25 +140,44 @@ function App() {
 
       if (!response.ok) {
         let errMsg = 'Generation failed.';
-
         try {
           const errBody = await response.json();
           errMsg = errBody.detail || errMsg;
-        } catch (_) {
-          // Ignore JSON parsing errors.
-        }
-
+        } catch (_) {}
         throw new Error(errMsg);
       }
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      let blob = await response.blob();
 
-      setAudioUrl(url);
+      // ---- Auto Speed adjustment (client‑side) ----
+      if (autoSpeed && targetTime) {
+        if (!soundTouchReady) {
+          throw new Error(
+            'Audio processing library is still loading. Please wait a moment and try again.'
+          );
+        }
+        setStatus({ message: 'Adjusting speed to target time...', type: '' });
+        const audioBuffer = await blobToAudioBuffer(blob);
+        const actualDuration = audioBuffer.duration;
+        const targetSeconds = parseFloat(targetTime);
 
+        if (targetSeconds > 0 && Math.abs(actualDuration - targetSeconds) > 0.1) {
+          // Stretch to target duration
+          const stretchedBuffer = await stretch(audioBuffer, targetSeconds);
+          blob = audioBufferToBlob(stretchedBuffer);
+          setStatus({
+            message: `✅ Audio adjusted from ${actualDuration.toFixed(1)}s to ${targetSeconds.toFixed(1)}s`,
+            type: 'success',
+          });
+        } else {
+          setStatus({ message: 'Audio already matches target time.', type: 'success' });
+        }
+      }
+
+      const audioUrl = URL.createObjectURL(blob);
+      setAudioUrl(audioUrl);
       setStatus({
-        message:
-          'Done! Preview it below or download the MP3.',
+        message: 'Done! Preview it below or download the MP3.',
         type: 'success',
       });
     } catch (err) {
@@ -228,20 +214,14 @@ function App() {
               <h2>Text to Speech</h2>
               <p className="subtitle">
                 Paste text or upload a transcript. Choose a voice.
-                Download studio-quality audio.
+                Download studio‑quality audio.
               </p>
             </div>
 
-            <Tabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
+            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {activeTab === 'text-tab' && (
-              <TextInput
-                text={text}
-                setText={setText}
-              />
+              <TextInput text={text} setText={setText} />
             )}
 
             {activeTab === 'file-tab' && (
@@ -271,30 +251,20 @@ function App() {
               setTargetTime={setTargetTime}
             />
 
-            <GenerateButton
-              onClick={handleGenerate}
-              loading={loading}
-            />
+            <GenerateButton onClick={handleGenerate} loading={loading} />
 
             <StatusMessage status={status} />
 
-            {audioUrl && (
-              <AudioPlayer audioUrl={audioUrl} />
-            )}
+            {audioUrl && <AudioPlayer audioUrl={audioUrl} />}
           </>
         )}
 
-        {currentPage === 'tikri' && (
-          <AudioAdjuster />
-        )}
+        {currentPage === 'tikri' && <AudioAdjuster />}
       </main>
 
       <Footer />
 
-      <AboutModal
-        isOpen={aboutOpen}
-        onClose={() => setAboutOpen(false)}
-      />
+      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 }

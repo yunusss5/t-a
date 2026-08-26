@@ -1,5 +1,5 @@
 // src/components/AudioAdjuster.jsx
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 function AudioAdjuster() {
   // ---------- State ----------
@@ -14,14 +14,43 @@ function AudioAdjuster() {
   const [progress, setProgress] = useState(0);
   const [playerUrl, setPlayerUrl] = useState(null);
   const [fileName, setFileName] = useState('No file selected');
+  const [soundTouchReady, setSoundTouchReady] = useState(false);
 
-  // Refs for audio processing
+  // Refs
   const audioPlayerRef = useRef(null);
   const audioContextRef = useRef(null);
   const sourceArrayBufferRef = useRef(null);
-  const processedBufferRef = useRef(null);
-  const processedSpeedRef = useRef(null);
   const sourceUrlRef = useRef(null);
+
+  // ---------- Load SoundTouch from CDN ----------
+  useEffect(() => {
+    const loadSoundTouch = () => {
+      return new Promise((resolve, reject) => {
+        if (window.SoundTouch) {
+          setSoundTouchReady(true);
+          resolve(window.SoundTouch);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/soundtouch/1.0.0/soundtouch.min.js';
+        script.async = true;
+        script.onload = () => {
+          if (window.SoundTouch) {
+            setSoundTouchReady(true);
+            resolve(window.SoundTouch);
+          } else {
+            reject(new Error('SoundTouch not loaded'));
+          }
+        };
+        script.onerror = () => reject(new Error('Failed to load SoundTouch library'));
+        document.head.appendChild(script);
+      });
+    };
+    loadSoundTouch().catch(err => {
+      console.error('SoundTouch load error:', err);
+      setStatus('⚠️ Failed to load audio processing library. Please check your internet connection.', 'error');
+    });
+  }, []);
 
   // ---------- Helpers ----------
   const formatTime = (sec) => {
@@ -39,13 +68,9 @@ function AudioAdjuster() {
   // ---------- Load Audio ----------
   const loadAudioFile = (file) => {
     if (!file) return;
-    // Revoke old URLs
     if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
     if (playerUrl) URL.revokeObjectURL(playerUrl);
-    // Reset cached buffers
     sourceArrayBufferRef.current = null;
-    processedBufferRef.current = null;
-    processedSpeedRef.current = null;
 
     const url = URL.createObjectURL(file);
     sourceUrlRef.current = url;
@@ -53,7 +78,6 @@ function AudioAdjuster() {
     setFile(file);
     setFileName(file.name.length > 28 ? file.name.slice(0, 24) + '…' : file.name);
 
-    // Load audio metadata
     const audio = audioPlayerRef.current;
     if (!audio) return;
     audio.src = url;
@@ -63,7 +87,7 @@ function AudioAdjuster() {
       const dur = audio.duration;
       if (isFinite(dur) && dur > 0) {
         setOriginalDuration(dur);
-        setTargetLength(dur);
+        setTargetLength(Math.round(dur * 10) / 10);
         setStatus(`✅ Loaded: ${formatTime(dur)}`, 'green');
       }
       audio.removeEventListener('loadedmetadata', onMeta);
@@ -85,51 +109,79 @@ function AudioAdjuster() {
     return clamped;
   }, [originalDuration, targetLength]);
 
-  // Recompute when duration or target changes
   useEffect(() => {
     computeSpeed();
   }, [computeSpeed]);
 
-  // ---------- Get Processed Buffer (cached) ----------
-  const getProcessedBuffer = useCallback(async (speedVal) => {
-    if (processedBufferRef.current && processedSpeedRef.current === speedVal) {
-      return processedBufferRef.current;
+  // ---------- Process with SoundTouch ----------
+  const processWithSoundTouch = useCallback(async (buffer, speedVal) => {
+    if (!soundTouchReady) {
+      throw new Error('SoundTouch library not loaded yet. Please wait.');
     }
+    // SoundTouch expects interleaved float samples
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const length = buffer.length;
+
+    // Get channel data
+    const channelData = [];
+    for (let ch = 0; ch < numChannels; ch++) {
+      channelData.push(buffer.getChannelData(ch));
+    }
+
+    // Interleave
+    const interleaved = new Float32Array(length * numChannels);
+    for (let i = 0; i < length; i++) {
+      for (let ch = 0; ch < numChannels; ch++) {
+        interleaved[i * numChannels + ch] = channelData[ch][i];
+      }
+    }
+
+    // Create SoundTouch instance
+    const st = new window.SoundTouch();
+    st.init(sampleRate, numChannels);
+    st.setTempo(speedVal);
+
+    // Process
+    const output = st.process(interleaved);
+
+    // Deinterleave
+    const outLength = output.length / numChannels;
+    const outBuffer = audioContextRef.current.createBuffer(numChannels, outLength, sampleRate);
+    for (let ch = 0; ch < numChannels; ch++) {
+      const outChannel = outBuffer.getChannelData(ch);
+      for (let i = 0; i < outLength; i++) {
+        outChannel[i] = output[i * numChannels + ch];
+      }
+    }
+
+    return outBuffer;
+  }, [soundTouchReady]);
+
+  // ---------- Get Processed Buffer ----------
+  const getProcessedBuffer = useCallback(async (speedVal, onProgress) => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
+
     if (!sourceArrayBufferRef.current) {
       const response = await fetch(sourceUrlRef.current);
       sourceArrayBufferRef.current = await response.arrayBuffer();
     }
-    const bufferCopy = sourceArrayBufferRef.current.slice(0);
-    const decoded = await audioContextRef.current.decodeAudioData(bufferCopy);
-    const speedFactor = speedVal;
-    const originalData = decoded.getChannelData(0);
-    const newLength = Math.max(1, Math.round(originalData.length / speedFactor));
-    const numChannels = decoded.numberOfChannels;
-    const newBuffer = audioContextRef.current.createBuffer(numChannels, newLength, decoded.sampleRate);
 
-    for (let channel = 0; channel < numChannels; channel++) {
-      const channelData = decoded.getChannelData(channel);
-      const newChannelData = newBuffer.getChannelData(channel);
-      for (let i = 0; i < newLength; i++) {
-        const srcPos = i * speedFactor;
-        const index = Math.floor(srcPos);
-        const frac = srcPos - index;
-        if (index < channelData.length - 1) {
-          newChannelData[i] = channelData[index] * (1 - frac) + channelData[index + 1] * frac;
-        } else if (index < channelData.length) {
-          newChannelData[i] = channelData[index];
-        } else {
-          newChannelData[i] = 0;
-        }
-      }
-    }
-    processedBufferRef.current = newBuffer;
-    processedSpeedRef.current = speedVal;
-    return newBuffer;
-  }, []);
+    const decoded = await audioContextRef.current.decodeAudioData(
+      sourceArrayBufferRef.current.slice(0)
+    );
+
+    if (Math.abs(speedVal - 1) < 0.01) return decoded;
+
+    if (onProgress) onProgress(30);
+
+    const stretched = await processWithSoundTouch(decoded, speedVal);
+
+    if (onProgress) onProgress(100);
+    return stretched;
+  }, [processWithSoundTouch]);
 
   // ---------- Apply Speed ----------
   const applySpeed = useCallback(async () => {
@@ -137,31 +189,38 @@ function AudioAdjuster() {
       setStatus('⚠️ Please upload an MP3 file first!', 'error');
       return;
     }
+    if (!soundTouchReady) {
+      setStatus('⚠️ Audio processing library is still loading. Please wait a moment.', 'error');
+      return;
+    }
     const spd = computeSpeed();
     if (Math.abs(spd - 1) < 0.01) {
-      // Reset to original
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
       setPlayerUrl(sourceUrlRef.current);
       setStatus('✅ Set to original length', 'green');
       return;
     }
+
     setIsProcessing(true);
-    setStatus('⏳ Processing...', '');
+    setProgress(10);
+    setStatus('⏳ Processing with SoundTouch (professional quality)...', '');
+
     try {
-      const buffer = await getProcessedBuffer(spd);
+      const buffer = await getProcessedBuffer(spd, (p) => setProgress(p));
       const wavData = bufferToWav(buffer);
       const blob = new Blob([wavData], { type: 'audio/wav' });
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
       const newUrl = URL.createObjectURL(blob);
       setPlayerUrl(newUrl);
-      setStatus('✅ Applied! Player shows new length', 'green');
+      setStatus('✅ Applied! Pitch preserved, new length: ' + buffer.duration.toFixed(1) + 's', 'green');
     } catch (err) {
-      console.error(err);
-      setStatus('❌ Error processing audio', 'error');
+      console.error('Apply error:', err);
+      setStatus('❌ Error: ' + err.message, 'error');
     } finally {
       setIsProcessing(false);
+      setProgress(0);
     }
-  }, [originalDuration, computeSpeed, getProcessedBuffer, playerUrl]);
+  }, [originalDuration, computeSpeed, getProcessedBuffer, playerUrl, soundTouchReady]);
 
   // ---------- Download ----------
   const downloadAudio = useCallback(async () => {
@@ -169,18 +228,21 @@ function AudioAdjuster() {
       setStatus('⚠️ Please upload an MP3 file first!', 'error');
       return;
     }
+    if (!soundTouchReady) {
+      setStatus('⚠️ Audio processing library is still loading. Please wait.', 'error');
+      return;
+    }
     const spd = speed;
     if (Math.abs(spd - 1) < 0.01) {
       setStatus('ℹ️ Audio already at target length – no change needed', '');
       return;
     }
+
     setIsDownloading(true);
     setProgress(20);
     try {
-      const buffer = await getProcessedBuffer(spd);
-      setProgress(70);
+      const buffer = await getProcessedBuffer(spd, (p) => setProgress(p));
       const wavData = bufferToWav(buffer);
-      setProgress(90);
       const blob = new Blob([wavData], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -195,13 +257,13 @@ function AudioAdjuster() {
       setStatus('✅ Downloaded successfully!', 'green');
       setTimeout(() => setProgress(0), 2000);
     } catch (err) {
-      console.error(err);
-      setStatus('❌ Error downloading', 'error');
+      console.error('Download error:', err);
+      setStatus('❌ Error: ' + err.message, 'error');
     } finally {
       setIsDownloading(false);
       setProgress(0);
     }
-  }, [originalDuration, speed, targetLength, file, getProcessedBuffer]);
+  }, [originalDuration, speed, targetLength, file, getProcessedBuffer, soundTouchReady]);
 
   // ---------- Reset ----------
   const resetAll = () => {
@@ -209,8 +271,6 @@ function AudioAdjuster() {
       setTargetLength(originalDuration);
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
       setPlayerUrl(sourceUrlRef.current);
-      processedBufferRef.current = null;
-      processedSpeedRef.current = null;
       setStatus('✅ Reset to original length', 'green');
     } else {
       setStatus('⏳ Please upload an MP3', '');
@@ -225,8 +285,7 @@ function AudioAdjuster() {
       return;
     }
     const newTarget = originalDuration / presetSpeed;
-    setTargetLength(newTarget);
-    // computeSpeed will run automatically via useEffect
+    setTargetLength(Math.round(newTarget * 10) / 10);
     setStatus(`🎯 Target set to ${newTarget.toFixed(1)}s`, '');
   };
 
@@ -289,7 +348,6 @@ function AudioAdjuster() {
     const dropped = e.dataTransfer.files[0];
     if (dropped && (dropped.type === 'audio/mpeg' || dropped.name.endsWith('.mp3'))) {
       loadAudioFile(dropped);
-      // sync the input
       const input = document.getElementById('fileInput');
       if (input) {
         const dt = new DataTransfer();
@@ -308,7 +366,11 @@ function AudioAdjuster() {
     <div className="audio-adjuster">
       <div className="page-intro">
         <h2>🎯 Audio Length Adjuster</h2>
-        <p className="subtitle">Upload an MP3, set a target length, and we'll speed it up or slow it down.</p>
+        <p className="subtitle">
+          Upload an MP3, set a target length – we'll speed it up or slow it down
+          <strong> without changing the pitch</strong> (SoundTouch engine).
+        </p>
+        {!soundTouchReady && <p className="subtitle" style={{ color: 'var(--accent)' }}>⏳ Loading audio processing engine...</p>}
       </div>
 
       {/* Upload Area */}
@@ -364,12 +426,12 @@ function AudioAdjuster() {
         ))}
       </div>
 
-      {/* Speed Info */}
+      {/* Speed Display */}
       <div className="speed-display-box">
         <div className="speed-number" data-speed={speed}>
           {speed.toFixed(2)}×
         </div>
-        <div className="speed-label">Required Speed</div>
+        <div className="speed-label">Required Speed (pitch preserved)</div>
         <div className="speed-details">
           <span>Original: {originalDuration ? originalDuration.toFixed(1) + 's' : '—'}</span>
           <span>Target: {targetLength ? targetLength.toFixed(1) + 's' : '—'}</span>
@@ -388,10 +450,10 @@ function AudioAdjuster() {
 
       {/* Action Buttons */}
       <div className="action-row">
-        <button className="btn btn-primary" onClick={applySpeed} disabled={isProcessing}>
+        <button className="btn btn-primary" onClick={applySpeed} disabled={isProcessing || !soundTouchReady}>
           {isProcessing ? '⏳ Processing...' : '✅ Apply Speed'}
         </button>
-        <button className="btn btn-success" onClick={downloadAudio} disabled={isDownloading || !originalDuration}>
+        <button className="btn btn-success" onClick={downloadAudio} disabled={isDownloading || !originalDuration || !soundTouchReady}>
           {isDownloading ? '⏳ Downloading...' : '⬇️ Download New Audio'}
         </button>
         <button className="btn btn-secondary" onClick={resetAll}>↺ Reset</button>
@@ -403,7 +465,8 @@ function AudioAdjuster() {
       </div>
 
       <div className="footnote">
-        💡 Speed changes the playback time. Download to save the new audio as WAV.
+        💡 Uses the <strong>SoundTouch</strong> engine (the same as Audacity) – professional‑grade time‑stretching with pitch preservation.
+        Download to save as WAV.
       </div>
     </div>
   );
