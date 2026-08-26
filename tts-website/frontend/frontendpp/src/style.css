@@ -741,3 +741,211 @@ audio {
 
   user-select: all;
 }
+/* ---------- Audio Adjuster Specific ---------- */
+.audio-adjuster {
+  width: 100%;
+}
+
+.audio-upload {
+  margin-bottom: 20px;
+}
+.file-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.file-duration {
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.audio-target {
+  margin: 16px 0 8px;
+}
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.input-row .unit {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.input-row .hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-left: auto;
+}
+.input-row .hint strong {
+  color: var(--text-primary);
+}
+
+.preset-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0 20px;
+}
+.preset-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.preset-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+.preset-btn.active {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 12px rgba(109, 94, 252, 0.25);
+}
+
+.speed-display-box {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.speed-number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+.speed-number[data-speed] {
+  /* optional dynamic color */
+}
+.speed-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.speed-details {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.speed-details span {
+  background: var(--bg-primary);
+  padding: 2px 12px;
+  border-radius: 20px;
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0 12px;
+}
+.btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 24px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1 1 auto;
+  min-width: 120px;
+  font-family: inherit;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+.btn-primary {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: white;
+}
+.btn-primary:hover {
+  box-shadow: 0 8px 24px rgba(109, 94, 252, 0.3);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border-color: transparent;
+  color: white;
+}
+.btn-success:hover {
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-secondary {
+  background: transparent;
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.audio-player-wrap {
+  background: var(--bg-secondary);
+  border-radius: 60px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  margin-top: 12px;
+}
+.audio-player-wrap audio {
+  width: 100%;
+  height: 40px;
+  outline: none;
+  border-radius: 40px;
+}
+
+.footnote {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .speed-number {
+    font-size: 2.2rem;
+  }
+  .input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .input-row .hint {
+    margin-left: 0;
+  }
+  .action-row .btn {
+    flex: 1 1 100%;
+  }
+}

@@ -11,7 +11,7 @@ import GenerateButton from './components/GenerateButton';
 import StatusMessage from './components/StatusMessage';
 import AudioPlayer from './components/AudioPlayer';
 import AboutModal from './components/AboutModal';
-import ServicePlaceholder from './components/ServicePlaceholder';
+import AudioAdjuster from './components/AudioAdjuster';
 
 function App() {
   // ---------- State ----------
@@ -41,7 +41,10 @@ function App() {
 
   // ---------- Load Voices ----------
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE || 'https://tts-backend-33xv.onrender.com';
+    const API_BASE =
+      import.meta.env.VITE_API_BASE ||
+      'https://tts-backend-33xv.onrender.com';
+
     fetch(`${API_BASE}/voices`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch voices');
@@ -49,25 +52,45 @@ function App() {
       })
       .then(data => {
         setAllVoices(data);
+
         const langs = [...new Set(data.map(v => v.locale))].sort();
         setLanguageOptions(langs);
+
         if (langs.length) {
           setLanguage(langs[0]);
-          const voicesForLang = data.filter(v => v.locale === langs[0]);
+
+          const voicesForLang = data.filter(
+            v => v.locale === langs[0]
+          );
+
           setVoiceOptions(voicesForLang);
-          if (voicesForLang.length) setVoice(voicesForLang[0].name);
+
+          if (voicesForLang.length) {
+            setVoice(voicesForLang[0].name);
+          }
         }
       })
-      .catch(err => {
-        setStatus({ message: 'Could not load voices. Is the backend running?', type: 'error' });
+      .catch(() => {
+        setStatus({
+          message: 'Could not load voices. Is the backend running?',
+          type: 'error',
+        });
       });
   }, []);
 
+  // ---------- Update voices when language changes ----------
   useEffect(() => {
     if (!language || !allVoices.length) return;
-    const filtered = allVoices.filter(v => v.locale === language);
+
+    const filtered = allVoices.filter(
+      v => v.locale === language
+    );
+
     setVoiceOptions(filtered);
-    if (filtered.length) setVoice(filtered[0].name);
+
+    if (filtered.length) {
+      setVoice(filtered[0].name);
+    }
   }, [language, allVoices]);
 
   // ---------- Generate handler ----------
@@ -76,57 +99,106 @@ function App() {
     setAudioUrl(null);
 
     if (!voice) {
-      setStatus({ message: 'Please select a voice.', type: 'error' });
+      setStatus({
+        message: 'Please select a voice.',
+        type: 'error',
+      });
       return;
     }
+
     if (activeTab === 'text-tab' && !text.trim()) {
-      setStatus({ message: 'Please paste some text first.', type: 'error' });
+      setStatus({
+        message: 'Please paste some text first.',
+        type: 'error',
+      });
       return;
     }
+
     if (activeTab === 'file-tab' && !file) {
-      setStatus({ message: 'Please choose a transcript file first.', type: 'error' });
+      setStatus({
+        message: 'Please choose a transcript file first.',
+        type: 'error',
+      });
       return;
     }
+
     if (autoSpeed && !targetTime) {
-      setStatus({ message: 'Enter a target time, or turn off Auto Speed.', type: 'error' });
+      setStatus({
+        message: 'Enter a target time, or turn off Auto Speed.',
+        type: 'error',
+      });
       return;
     }
 
     setLoading(true);
-    setStatus({ message: 'Generating audio... this can take a few seconds for long text.', type: '' });
+
+    setStatus({
+      message:
+        'Generating audio... this can take a few seconds for long text.',
+      type: '',
+    });
 
     try {
-      const API_BASE = import.meta.env.VITE_API_BASE || 'https://tts-backend-33xv.onrender.com';
+      const API_BASE =
+        import.meta.env.VITE_API_BASE ||
+        'https://tts-backend-33xv.onrender.com';
+
       const formData = new FormData();
+
       formData.append('voice', voice);
       formData.append('rate', rate);
       formData.append('auto_speed', String(autoSpeed));
-      if (autoSpeed) formData.append('target_time', targetTime);
+
+      if (autoSpeed) {
+        formData.append('target_time', targetTime);
+      }
 
       let response;
+
       if (activeTab === 'text-tab') {
         formData.append('text', text);
-        response = await fetch(`${API_BASE}/generate`, { method: 'POST', body: formData });
+
+        response = await fetch(`${API_BASE}/generate`, {
+          method: 'POST',
+          body: formData,
+        });
       } else {
         formData.append('file', file);
-        response = await fetch(`${API_BASE}/generate-from-file`, { method: 'POST', body: formData });
+
+        response = await fetch(`${API_BASE}/generate-from-file`, {
+          method: 'POST',
+          body: formData,
+        });
       }
 
       if (!response.ok) {
         let errMsg = 'Generation failed.';
+
         try {
           const errBody = await response.json();
           errMsg = errBody.detail || errMsg;
-        } catch (_) {}
+        } catch (_) {
+          // Ignore JSON parsing errors.
+        }
+
         throw new Error(errMsg);
       }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+
       setAudioUrl(url);
-      setStatus({ message: 'Done! Preview it below or download the MP3.', type: 'success' });
+
+      setStatus({
+        message:
+          'Done! Preview it below or download the MP3.',
+        type: 'success',
+      });
     } catch (err) {
-      setStatus({ message: err.message || 'Something went wrong.', type: 'error' });
+      setStatus({
+        message: err.message || 'Something went wrong.',
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -148,18 +220,38 @@ function App() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
+
       <main className="container">
         {currentPage === 'home' && (
           <>
             <div className="page-intro">
               <h2>Text to Speech</h2>
-              <p className="subtitle">Paste text or upload a transcript. Choose a voice. Download studio‑quality audio.</p>
+              <p className="subtitle">
+                Paste text or upload a transcript. Choose a voice.
+                Download studio-quality audio.
+              </p>
             </div>
-            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-            {activeTab === 'text-tab' && <TextInput text={text} setText={setText} />}
-            {activeTab === 'file-tab' && (
-              <FileUpload file={file} setFile={setFile} fileInputRef={fileInputRef} />
+
+            <Tabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+
+            {activeTab === 'text-tab' && (
+              <TextInput
+                text={text}
+                setText={setText}
+              />
             )}
+
+            {activeTab === 'file-tab' && (
+              <FileUpload
+                file={file}
+                setFile={setFile}
+                fileInputRef={fileInputRef}
+              />
+            )}
+
             <Controls
               language={language}
               setLanguage={setLanguage}
@@ -171,21 +263,38 @@ function App() {
               setRate={setRate}
               autoSpeed={autoSpeed}
             />
+
             <AutoSpeed
               autoSpeed={autoSpeed}
               setAutoSpeed={setAutoSpeed}
               targetTime={targetTime}
               setTargetTime={setTargetTime}
             />
-            <GenerateButton onClick={handleGenerate} loading={loading} />
+
+            <GenerateButton
+              onClick={handleGenerate}
+              loading={loading}
+            />
+
             <StatusMessage status={status} />
-            {audioUrl && <AudioPlayer audioUrl={audioUrl} />}
+
+            {audioUrl && (
+              <AudioPlayer audioUrl={audioUrl} />
+            )}
           </>
         )}
-        {currentPage === 'tikri' && <ServicePlaceholder />}
+
+        {currentPage === 'tikri' && (
+          <AudioAdjuster />
+        )}
       </main>
+
       <Footer />
-      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+
+      <AboutModal
+        isOpen={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+      />
     </div>
   );
 }
