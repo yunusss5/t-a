@@ -1,5 +1,5 @@
 // src/components/AudioAdjuster.jsx
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 function AudioAdjuster() {
   // ---------- State ----------
@@ -15,12 +15,10 @@ function AudioAdjuster() {
   const [playerUrl, setPlayerUrl] = useState(null);
   const [fileName, setFileName] = useState('No file selected');
 
-  // Refs for audio processing
+  // Refs
   const audioPlayerRef = useRef(null);
   const audioContextRef = useRef(null);
   const sourceArrayBufferRef = useRef(null);
-  const processedBufferRef = useRef(null);
-  const processedSpeedRef = useRef(null);
   const sourceUrlRef = useRef(null);
 
   // ---------- Helpers ----------
@@ -36,16 +34,116 @@ function AudioAdjuster() {
     setStatusClass(cls);
   };
 
+  // ---------- Advanced WSOLA Time‑Stretch (pitch‑preserving) ----------
+  function wsolaTimeStretch(buffer, speed) {
+    if (Math.abs(speed - 1) < 0.001) return buffer;
+
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const length = buffer.length;
+
+    // Parameters – tuned for quality
+    const frameSize = 2048;                // analysis frame size (power of 2)
+    const hopSize = Math.round(frameSize / 4); // synthesis hop (25% overlap)
+    const searchWindow = Math.round(frameSize / 8); // ± search range for alignment
+
+    // Estimated output length
+    const newLength = Math.max(1, Math.round(length / speed));
+    const outputBuffer = audioContextRef.current.createBuffer(numChannels, newLength, sampleRate);
+
+    // Process each channel independently (mono compatibility)
+    for (let ch = 0; ch < numChannels; ch++) {
+      const input = buffer.getChannelData(ch);
+      const output = outputBuffer.getChannelData(ch);
+
+      let readIndex = 0;
+      let writeIndex = 0;
+
+      // Hanning window
+      const window = new Float32Array(frameSize);
+      for (let i = 0; i < frameSize; i++) {
+        window[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (frameSize - 1)));
+      }
+
+      // Buffer for cross‑correlation (pre‑computed once per frame)
+      const corrBuffer = new Float32Array(searchWindow * 2 + 1);
+
+      while (readIndex + frameSize <= input.length && writeIndex + frameSize <= output.length) {
+        // 1. Find best alignment using cross‑correlation
+        const readStart = Math.max(0, readIndex - searchWindow);
+        const readEnd = Math.min(input.length - frameSize, readIndex + searchWindow);
+        const searchRange = readEnd - readStart + 1;
+
+        let bestOffset = readIndex - readStart;
+        let bestCorr = -Infinity;
+
+        // For each possible offset, compute cross‑correlation between the next input frame and the current output tail
+        for (let offset = 0; offset < searchRange; offset++) {
+          const start = readStart + offset;
+          let corr = 0;
+          // Compare last hopSize samples of output (already written) with the next input frame
+          const compareLen = Math.min(hopSize, frameSize);
+          for (let i = 0; i < compareLen; i++) {
+            const outIdx = writeIndex - hopSize + i;
+            const inIdx = start + i;
+            if (outIdx >= 0 && outIdx < output.length && inIdx < input.length) {
+              corr += output[outIdx] * input[inIdx];
+            }
+          }
+          if (corr > bestCorr) {
+            bestCorr = corr;
+            bestOffset = offset;
+          }
+        }
+
+        // Optimal starting position in input
+        const optStart = readStart + bestOffset;
+
+        // 2. Apply Hanning window and overlap‑add
+        const fadeLength = Math.min(hopSize, frameSize);
+        const gain = 1.0 / Math.sqrt(hopSize); // Normalize to avoid clipping
+
+        for (let i = 0; i < frameSize; i++) {
+          const inIdx = optStart + i;
+          const outIdx = writeIndex + i;
+          if (inIdx < input.length && outIdx < output.length) {
+            // Apply window and gain
+            const win = window[i];
+            output[outIdx] += input[inIdx] * win * gain;
+          }
+        }
+
+        // 3. Advance read pointer by speed * hopSize (with compensation for alignment shift)
+        readIndex += Math.round(hopSize * speed) + (optStart - readIndex);
+        // Clamp to avoid reading beyond bounds
+        readIndex = Math.min(readIndex, input.length - frameSize);
+
+        writeIndex += hopSize;
+        if (writeIndex + frameSize > output.length) break;
+      }
+
+      // 4. Normalize output to prevent clipping
+      let maxVal = 0;
+      for (let i = 0; i < output.length; i++) {
+        if (Math.abs(output[i]) > maxVal) maxVal = Math.abs(output[i]);
+      }
+      if (maxVal > 0.95) {
+        const gain = 0.9 / maxVal;
+        for (let i = 0; i < output.length; i++) {
+          output[i] *= gain;
+        }
+      }
+    }
+
+    return outputBuffer;
+  }
+
   // ---------- Load Audio ----------
   const loadAudioFile = (file) => {
     if (!file) return;
-    // Revoke old URLs
     if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
     if (playerUrl) URL.revokeObjectURL(playerUrl);
-    // Reset cached buffers
     sourceArrayBufferRef.current = null;
-    processedBufferRef.current = null;
-    processedSpeedRef.current = null;
 
     const url = URL.createObjectURL(file);
     sourceUrlRef.current = url;
@@ -53,7 +151,6 @@ function AudioAdjuster() {
     setFile(file);
     setFileName(file.name.length > 28 ? file.name.slice(0, 24) + '…' : file.name);
 
-    // Load audio metadata
     const audio = audioPlayerRef.current;
     if (!audio) return;
     audio.src = url;
@@ -63,7 +160,7 @@ function AudioAdjuster() {
       const dur = audio.duration;
       if (isFinite(dur) && dur > 0) {
         setOriginalDuration(dur);
-        setTargetLength(dur);
+        setTargetLength(Math.round(dur * 10) / 10);
         setStatus(`✅ Loaded: ${formatTime(dur)}`, 'green');
       }
       audio.removeEventListener('loadedmetadata', onMeta);
@@ -85,50 +182,34 @@ function AudioAdjuster() {
     return clamped;
   }, [originalDuration, targetLength]);
 
-  // Recompute when duration or target changes
   useEffect(() => {
     computeSpeed();
   }, [computeSpeed]);
 
-  // ---------- Get Processed Buffer (cached) ----------
-  const getProcessedBuffer = useCallback(async (speedVal) => {
-    if (processedBufferRef.current && processedSpeedRef.current === speedVal) {
-      return processedBufferRef.current;
-    }
+  // ---------- Get Processed Buffer ----------
+  const getProcessedBuffer = useCallback(async (speedVal, onProgress) => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
+
     if (!sourceArrayBufferRef.current) {
       const response = await fetch(sourceUrlRef.current);
       sourceArrayBufferRef.current = await response.arrayBuffer();
     }
-    const bufferCopy = sourceArrayBufferRef.current.slice(0);
-    const decoded = await audioContextRef.current.decodeAudioData(bufferCopy);
-    const speedFactor = speedVal;
-    const originalData = decoded.getChannelData(0);
-    const newLength = Math.max(1, Math.round(originalData.length / speedFactor));
-    const numChannels = decoded.numberOfChannels;
-    const newBuffer = audioContextRef.current.createBuffer(numChannels, newLength, decoded.sampleRate);
 
-    for (let channel = 0; channel < numChannels; channel++) {
-      const channelData = decoded.getChannelData(channel);
-      const newChannelData = newBuffer.getChannelData(channel);
-      for (let i = 0; i < newLength; i++) {
-        const srcPos = i * speedFactor;
-        const index = Math.floor(srcPos);
-        const frac = srcPos - index;
-        if (index < channelData.length - 1) {
-          newChannelData[i] = channelData[index] * (1 - frac) + channelData[index + 1] * frac;
-        } else if (index < channelData.length) {
-          newChannelData[i] = channelData[index];
-        } else {
-          newChannelData[i] = 0;
-        }
-      }
-    }
-    processedBufferRef.current = newBuffer;
-    processedSpeedRef.current = speedVal;
-    return newBuffer;
+    const decoded = await audioContextRef.current.decodeAudioData(
+      sourceArrayBufferRef.current.slice(0)
+    );
+
+    if (Math.abs(speedVal - 1) < 0.01) return decoded;
+
+    // Report progress start
+    if (onProgress) onProgress(30);
+
+    const stretched = wsolaTimeStretch(decoded, speedVal);
+
+    if (onProgress) onProgress(100);
+    return stretched;
   }, []);
 
   // ---------- Apply Speed ----------
@@ -139,27 +220,30 @@ function AudioAdjuster() {
     }
     const spd = computeSpeed();
     if (Math.abs(spd - 1) < 0.01) {
-      // Reset to original
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
       setPlayerUrl(sourceUrlRef.current);
       setStatus('✅ Set to original length', 'green');
       return;
     }
+
     setIsProcessing(true);
-    setStatus('⏳ Processing...', '');
+    setProgress(10);
+    setStatus('⏳ Processing with WSOLA (pitch preserved)...', '');
+
     try {
-      const buffer = await getProcessedBuffer(spd);
+      const buffer = await getProcessedBuffer(spd, (p) => setProgress(p));
       const wavData = bufferToWav(buffer);
       const blob = new Blob([wavData], { type: 'audio/wav' });
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
       const newUrl = URL.createObjectURL(blob);
       setPlayerUrl(newUrl);
-      setStatus('✅ Applied! Player shows new length', 'green');
+      setStatus('✅ Applied! Pitch preserved, new length: ' + buffer.duration.toFixed(1) + 's', 'green');
     } catch (err) {
-      console.error(err);
-      setStatus('❌ Error processing audio', 'error');
+      console.error('Apply error:', err);
+      setStatus('❌ Error: ' + err.message, 'error');
     } finally {
       setIsProcessing(false);
+      setProgress(0);
     }
   }, [originalDuration, computeSpeed, getProcessedBuffer, playerUrl]);
 
@@ -174,13 +258,12 @@ function AudioAdjuster() {
       setStatus('ℹ️ Audio already at target length – no change needed', '');
       return;
     }
+
     setIsDownloading(true);
     setProgress(20);
     try {
-      const buffer = await getProcessedBuffer(spd);
-      setProgress(70);
+      const buffer = await getProcessedBuffer(spd, (p) => setProgress(p));
       const wavData = bufferToWav(buffer);
-      setProgress(90);
       const blob = new Blob([wavData], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -195,8 +278,8 @@ function AudioAdjuster() {
       setStatus('✅ Downloaded successfully!', 'green');
       setTimeout(() => setProgress(0), 2000);
     } catch (err) {
-      console.error(err);
-      setStatus('❌ Error downloading', 'error');
+      console.error('Download error:', err);
+      setStatus('❌ Error: ' + err.message, 'error');
     } finally {
       setIsDownloading(false);
       setProgress(0);
@@ -209,8 +292,6 @@ function AudioAdjuster() {
       setTargetLength(originalDuration);
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
       setPlayerUrl(sourceUrlRef.current);
-      processedBufferRef.current = null;
-      processedSpeedRef.current = null;
       setStatus('✅ Reset to original length', 'green');
     } else {
       setStatus('⏳ Please upload an MP3', '');
@@ -225,8 +306,7 @@ function AudioAdjuster() {
       return;
     }
     const newTarget = originalDuration / presetSpeed;
-    setTargetLength(newTarget);
-    // computeSpeed will run automatically via useEffect
+    setTargetLength(Math.round(newTarget * 10) / 10);
     setStatus(`🎯 Target set to ${newTarget.toFixed(1)}s`, '');
   };
 
@@ -289,7 +369,6 @@ function AudioAdjuster() {
     const dropped = e.dataTransfer.files[0];
     if (dropped && (dropped.type === 'audio/mpeg' || dropped.name.endsWith('.mp3'))) {
       loadAudioFile(dropped);
-      // sync the input
       const input = document.getElementById('fileInput');
       if (input) {
         const dt = new DataTransfer();
@@ -308,7 +387,10 @@ function AudioAdjuster() {
     <div className="audio-adjuster">
       <div className="page-intro">
         <h2>🎯 Audio Length Adjuster</h2>
-        <p className="subtitle">Upload an MP3, set a target length, and we'll speed it up or slow it down.</p>
+        <p className="subtitle">
+          Upload an MP3, set a target length – we'll speed it up or slow it down
+          <strong> without changing the pitch</strong>.
+        </p>
       </div>
 
       {/* Upload Area */}
@@ -364,12 +446,12 @@ function AudioAdjuster() {
         ))}
       </div>
 
-      {/* Speed Info */}
+      {/* Speed Display */}
       <div className="speed-display-box">
         <div className="speed-number" data-speed={speed}>
           {speed.toFixed(2)}×
         </div>
-        <div className="speed-label">Required Speed</div>
+        <div className="speed-label">Required Speed (pitch preserved)</div>
         <div className="speed-details">
           <span>Original: {originalDuration ? originalDuration.toFixed(1) + 's' : '—'}</span>
           <span>Target: {targetLength ? targetLength.toFixed(1) + 's' : '—'}</span>
@@ -403,7 +485,8 @@ function AudioAdjuster() {
       </div>
 
       <div className="footnote">
-        💡 Speed changes the playback time. Download to save the new audio as WAV.
+        💡 Uses <strong>WSOLA</strong> with cross‑correlation – changes length without altering pitch.
+        Download to save as WAV.
       </div>
     </div>
   );
