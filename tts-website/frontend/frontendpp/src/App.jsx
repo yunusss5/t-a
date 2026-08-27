@@ -12,8 +12,6 @@ import StatusMessage from './components/StatusMessage';
 import AudioPlayer from './components/AudioPlayer';
 import AboutModal from './components/AboutModal';
 import AudioAdjuster from './components/AudioAdjuster';
-import { useSoundTouch } from './hooks/useSoundTouch';
-import { blobToAudioBuffer, audioBufferToBlob } from './utils/audioUtils';
 
 function App() {
   // ---------- State ----------
@@ -40,9 +38,6 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'tikri'
 
   const fileInputRef = useRef(null);
-
-  // SoundTouch hook
-  const { isReady: soundTouchReady, stretch } = useSoundTouch();
 
   // ---------- Load Voices ----------
   useEffect(() => {
@@ -98,7 +93,7 @@ function App() {
     }
   }, [language, allVoices]);
 
-  // ---------- Generate handler (with client‑side auto‑speed) ----------
+  // ---------- Generate handler ----------
   const handleGenerate = async () => {
     setStatus({ message: '', type: '' });
     setAudioUrl(null);
@@ -189,34 +184,9 @@ function App() {
         throw new Error(errMsg);
       }
 
-      let blob = await response.blob();
-
-      // ---- Auto Speed adjustment (client‑side) ----
-      if (autoSpeed && targetTime) {
-        if (!soundTouchReady) {
-          throw new Error(
-            'Audio processing library is still loading. Please wait a moment and try again.'
-          );
-        }
-        setStatus({ message: 'Adjusting speed to target time...', type: '' });
-        const audioBuffer = await blobToAudioBuffer(blob);
-        const actualDuration = audioBuffer.duration;
-        const targetSeconds = parseFloat(targetTime);
-
-        if (targetSeconds > 0 && Math.abs(actualDuration - targetSeconds) > 0.1) {
-          // Stretch to target duration
-          const stretchedBuffer = await stretch(audioBuffer, targetSeconds);
-          blob = audioBufferToBlob(stretchedBuffer);
-          setStatus({
-            message: `✅ Audio adjusted from ${actualDuration.toFixed(1)}s to ${targetSeconds.toFixed(1)}s`,
-            type: 'success',
-          });
-        } else {
-          setStatus({ message: 'Audio already matches target time.', type: 'success' });
-        }
-      }
-
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+
       setAudioUrl(url);
 
       setStatus({
