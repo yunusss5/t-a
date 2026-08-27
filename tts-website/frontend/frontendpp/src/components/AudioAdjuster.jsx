@@ -14,12 +14,44 @@ function AudioAdjuster() {
   const [progress, setProgress] = useState(0);
   const [playerUrl, setPlayerUrl] = useState(null);
   const [fileName, setFileName] = useState('No file selected');
+  const [soundTouchReady, setSoundTouchReady] = useState(false);
 
   // Refs
   const audioPlayerRef = useRef(null);
   const audioContextRef = useRef(null);
   const sourceArrayBufferRef = useRef(null);
   const sourceUrlRef = useRef(null);
+
+  // ---------- Load SoundTouch from CDN ----------
+  useEffect(() => {
+    const loadSoundTouch = () => {
+      return new Promise((resolve, reject) => {
+        if (window.SoundTouch) {
+          setSoundTouchReady(true);
+          resolve(window.SoundTouch);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/soundtouchjs@1.0.0/dist/soundtouch.min.js';
+        script.async = true;
+        script.onload = () => {
+          if (window.SoundTouch) {
+            setSoundTouchReady(true);
+            resolve(window.SoundTouch);
+          } else {
+            reject(new Error('SoundTouch not loaded'));
+          }
+        };
+        script.onerror = () => reject(new Error('Failed to load SoundTouch library'));
+        document.head.appendChild(script);
+      });
+    };
+    loadSoundTouch().catch(err => {
+      console.error('SoundTouch load error:', err);
+      setStatusText('⚠️ Failed to load audio processing library. Please check your internet connection.');
+      setStatusClass('error');
+    });
+  }, []);
 
   // ---------- Helpers ----------
   const formatTime = (sec) => {
@@ -33,110 +65,6 @@ function AudioAdjuster() {
     setStatusText(text);
     setStatusClass(cls);
   };
-
-  // ---------- Advanced WSOLA Time‑Stretch (pitch‑preserving) ----------
-  function wsolaTimeStretch(buffer, speed) {
-    if (Math.abs(speed - 1) < 0.001) return buffer;
-
-    const numChannels = buffer.numberOfChannels;
-    const sampleRate = buffer.sampleRate;
-    const length = buffer.length;
-
-    // Parameters – tuned for quality
-    const frameSize = 2048;                // analysis frame size (power of 2)
-    const hopSize = Math.round(frameSize / 4); // synthesis hop (25% overlap)
-    const searchWindow = Math.round(frameSize / 8); // ± search range for alignment
-
-    // Estimated output length
-    const newLength = Math.max(1, Math.round(length / speed));
-    const outputBuffer = audioContextRef.current.createBuffer(numChannels, newLength, sampleRate);
-
-    // Process each channel independently (mono compatibility)
-    for (let ch = 0; ch < numChannels; ch++) {
-      const input = buffer.getChannelData(ch);
-      const output = outputBuffer.getChannelData(ch);
-
-      let readIndex = 0;
-      let writeIndex = 0;
-
-      // Hanning window
-      const window = new Float32Array(frameSize);
-      for (let i = 0; i < frameSize; i++) {
-        window[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (frameSize - 1)));
-      }
-
-      // Buffer for cross‑correlation (pre‑computed once per frame)
-      const corrBuffer = new Float32Array(searchWindow * 2 + 1);
-
-      while (readIndex + frameSize <= input.length && writeIndex + frameSize <= output.length) {
-        // 1. Find best alignment using cross‑correlation
-        const readStart = Math.max(0, readIndex - searchWindow);
-        const readEnd = Math.min(input.length - frameSize, readIndex + searchWindow);
-        const searchRange = readEnd - readStart + 1;
-
-        let bestOffset = readIndex - readStart;
-        let bestCorr = -Infinity;
-
-        // For each possible offset, compute cross‑correlation between the next input frame and the current output tail
-        for (let offset = 0; offset < searchRange; offset++) {
-          const start = readStart + offset;
-          let corr = 0;
-          // Compare last hopSize samples of output (already written) with the next input frame
-          const compareLen = Math.min(hopSize, frameSize);
-          for (let i = 0; i < compareLen; i++) {
-            const outIdx = writeIndex - hopSize + i;
-            const inIdx = start + i;
-            if (outIdx >= 0 && outIdx < output.length && inIdx < input.length) {
-              corr += output[outIdx] * input[inIdx];
-            }
-          }
-          if (corr > bestCorr) {
-            bestCorr = corr;
-            bestOffset = offset;
-          }
-        }
-
-        // Optimal starting position in input
-        const optStart = readStart + bestOffset;
-
-        // 2. Apply Hanning window and overlap‑add
-        const fadeLength = Math.min(hopSize, frameSize);
-        const gain = 1.0 / Math.sqrt(hopSize); // Normalize to avoid clipping
-
-        for (let i = 0; i < frameSize; i++) {
-          const inIdx = optStart + i;
-          const outIdx = writeIndex + i;
-          if (inIdx < input.length && outIdx < output.length) {
-            // Apply window and gain
-            const win = window[i];
-            output[outIdx] += input[inIdx] * win * gain;
-          }
-        }
-
-        // 3. Advance read pointer by speed * hopSize (with compensation for alignment shift)
-        readIndex += Math.round(hopSize * speed) + (optStart - readIndex);
-        // Clamp to avoid reading beyond bounds
-        readIndex = Math.min(readIndex, input.length - frameSize);
-
-        writeIndex += hopSize;
-        if (writeIndex + frameSize > output.length) break;
-      }
-
-      // 4. Normalize output to prevent clipping
-      let maxVal = 0;
-      for (let i = 0; i < output.length; i++) {
-        if (Math.abs(output[i]) > maxVal) maxVal = Math.abs(output[i]);
-      }
-      if (maxVal > 0.95) {
-        const gain = 0.9 / maxVal;
-        for (let i = 0; i < output.length; i++) {
-          output[i] *= gain;
-        }
-      }
-    }
-
-    return outputBuffer;
-  }
 
   // ---------- Load Audio ----------
   const loadAudioFile = (file) => {
@@ -186,6 +114,51 @@ function AudioAdjuster() {
     computeSpeed();
   }, [computeSpeed]);
 
+  // ---------- Process with SoundTouch ----------
+  const processWithSoundTouch = useCallback(async (buffer, speedVal) => {
+    if (!soundTouchReady) {
+      throw new Error('SoundTouch library not loaded yet. Please wait.');
+    }
+
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const length = buffer.length;
+
+    // Get channel data
+    const channelData = [];
+    for (let ch = 0; ch < numChannels; ch++) {
+      channelData.push(buffer.getChannelData(ch));
+    }
+
+    // Interleave
+    const interleaved = new Float32Array(length * numChannels);
+    for (let i = 0; i < length; i++) {
+      for (let ch = 0; ch < numChannels; ch++) {
+        interleaved[i * numChannels + ch] = channelData[ch][i];
+      }
+    }
+
+    // Create SoundTouch instance
+    const st = new window.SoundTouch();
+    st.init(sampleRate, numChannels);
+    st.setTempo(speedVal);
+
+    // Process
+    const output = st.process(interleaved);
+
+    // Deinterleave
+    const outLength = output.length / numChannels;
+    const outBuffer = audioContextRef.current.createBuffer(numChannels, outLength, sampleRate);
+    for (let ch = 0; ch < numChannels; ch++) {
+      const outChannel = outBuffer.getChannelData(ch);
+      for (let i = 0; i < outLength; i++) {
+        outChannel[i] = output[i * numChannels + ch];
+      }
+    }
+
+    return outBuffer;
+  }, [soundTouchReady]);
+
   // ---------- Get Processed Buffer ----------
   const getProcessedBuffer = useCallback(async (speedVal, onProgress) => {
     if (!audioContextRef.current) {
@@ -203,14 +176,13 @@ function AudioAdjuster() {
 
     if (Math.abs(speedVal - 1) < 0.01) return decoded;
 
-    // Report progress start
     if (onProgress) onProgress(30);
 
-    const stretched = wsolaTimeStretch(decoded, speedVal);
+    const stretched = await processWithSoundTouch(decoded, speedVal);
 
     if (onProgress) onProgress(100);
     return stretched;
-  }, []);
+  }, [processWithSoundTouch]);
 
   // ---------- Apply Speed ----------
   const applySpeed = useCallback(async () => {
@@ -218,6 +190,11 @@ function AudioAdjuster() {
       setStatus('⚠️ Please upload an MP3 file first!', 'error');
       return;
     }
+    if (!soundTouchReady) {
+      setStatus('⚠️ Audio processing library is still loading. Please wait a moment.', 'error');
+      return;
+    }
+
     const spd = computeSpeed();
     if (Math.abs(spd - 1) < 0.01) {
       if (playerUrl && playerUrl !== sourceUrlRef.current) URL.revokeObjectURL(playerUrl);
@@ -228,7 +205,7 @@ function AudioAdjuster() {
 
     setIsProcessing(true);
     setProgress(10);
-    setStatus('⏳ Processing with WSOLA (pitch preserved)...', '');
+    setStatus('⏳ Processing with SoundTouch (professional quality)...', '');
 
     try {
       const buffer = await getProcessedBuffer(spd, (p) => setProgress(p));
@@ -245,7 +222,7 @@ function AudioAdjuster() {
       setIsProcessing(false);
       setProgress(0);
     }
-  }, [originalDuration, computeSpeed, getProcessedBuffer, playerUrl]);
+  }, [originalDuration, computeSpeed, getProcessedBuffer, playerUrl, soundTouchReady]);
 
   // ---------- Download ----------
   const downloadAudio = useCallback(async () => {
@@ -253,6 +230,11 @@ function AudioAdjuster() {
       setStatus('⚠️ Please upload an MP3 file first!', 'error');
       return;
     }
+    if (!soundTouchReady) {
+      setStatus('⚠️ Audio processing library is still loading. Please wait.', 'error');
+      return;
+    }
+
     const spd = speed;
     if (Math.abs(spd - 1) < 0.01) {
       setStatus('ℹ️ Audio already at target length – no change needed', '');
@@ -284,7 +266,7 @@ function AudioAdjuster() {
       setIsDownloading(false);
       setProgress(0);
     }
-  }, [originalDuration, speed, targetLength, file, getProcessedBuffer]);
+  }, [originalDuration, speed, targetLength, file, getProcessedBuffer, soundTouchReady]);
 
   // ---------- Reset ----------
   const resetAll = () => {
@@ -391,6 +373,11 @@ function AudioAdjuster() {
           Upload an MP3, set a target length – we'll speed it up or slow it down
           <strong> without changing the pitch</strong>.
         </p>
+        {!soundTouchReady && (
+          <p className="subtitle" style={{ color: 'var(--accent)', marginTop: '8px' }}>
+            ⏳ Loading audio processing engine...
+          </p>
+        )}
       </div>
 
       {/* Upload Area */}
@@ -470,10 +457,10 @@ function AudioAdjuster() {
 
       {/* Action Buttons */}
       <div className="action-row">
-        <button className="btn btn-primary" onClick={applySpeed} disabled={isProcessing}>
+        <button className="btn btn-primary" onClick={applySpeed} disabled={isProcessing || !soundTouchReady}>
           {isProcessing ? '⏳ Processing...' : '✅ Apply Speed'}
         </button>
-        <button className="btn btn-success" onClick={downloadAudio} disabled={isDownloading || !originalDuration}>
+        <button className="btn btn-success" onClick={downloadAudio} disabled={isDownloading || !originalDuration || !soundTouchReady}>
           {isDownloading ? '⏳ Downloading...' : '⬇️ Download New Audio'}
         </button>
         <button className="btn btn-secondary" onClick={resetAll}>↺ Reset</button>
@@ -485,7 +472,7 @@ function AudioAdjuster() {
       </div>
 
       <div className="footnote">
-        💡 Uses <strong>WSOLA</strong> with cross‑correlation – changes length without altering pitch.
+        💡 Uses the <strong>SoundTouch</strong> engine (the same as Audacity) – professional‑grade time‑stretching with pitch preservation.
         Download to save as WAV.
       </div>
     </div>
