@@ -1,0 +1,23 @@
+{
+  "name": "VoiceForge — Creator Toolkit",
+  "short_name": "VoiceForge",
+  "description": "Free browser tools for creators: SEO content, text to speech, subtitles, audio and images.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7fa",
+  "theme_color": "#f7f7fa",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ]
+}

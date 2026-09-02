@@ -1,0 +1,339 @@
+/* ============================================================================
+   tokens.css — the single source of truth for the design system.
+
+   Layer 1 is raw primitives (a tinted neutral ramp + the brand hue). Layer 2 is
+   semantic tokens, and it is the ONLY layer components are allowed to read, so
+   re-grading the product means editing this file and nothing else.
+
+   Every neutral carries a faint 276° tint, the same hue as the accent. That is
+   what keeps greys from reading as generic Bootstrap grey and makes the whole
+   surface feel like one graded system.
+   ============================================================================ */
+
+:root {
+  /* --- Layer 1a: neutral ramp ---------------------------------------- */
+  --n-0:    oklch(100%   0     0);
+  --n-25:   oklch(99.2%  0.002 276);
+  --n-50:   oklch(97.8%  0.004 276);
+  --n-100:  oklch(95.6%  0.006 276);
+  --n-150:  oklch(93.6%  0.007 276);
+  --n-200:  oklch(91.4%  0.009 276);
+  --n-300:  oklch(85.5%  0.012 276);
+  --n-400:  oklch(71%    0.016 276);
+  --n-500:  oklch(58.5%  0.018 276);
+  --n-600:  oklch(49%    0.020 276);
+  --n-700:  oklch(38.5%  0.020 276);
+  --n-800:  oklch(27.5%  0.019 276);
+  --n-850:  oklch(22%    0.019 276);
+  --n-900:  oklch(18%    0.018 276);
+  --n-950:  oklch(13.5%  0.017 276);
+  --n-1000: oklch(9.5%   0.016 276);
+
+  /* --- Layer 1b: brand ramp ----------------------------------------- */
+  --b-100: oklch(96%   0.022 276);
+  --b-200: oklch(92%   0.050 276);
+  --b-300: oklch(84%   0.095 276);
+  --b-400: oklch(73%   0.150 276);
+  --b-500: oklch(63%   0.185 276);
+  --b-600: oklch(53.5% 0.200 276);
+  --b-700: oklch(45%   0.185 276);
+  --b-800: oklch(36%   0.150 276);
+
+  /* --- Layer 1c: status + per-tool accent hues ----------------------- */
+  --h-emerald: 162;
+  --h-amber: 78;
+  --h-rose: 16;
+  --h-sky: 235;
+  --h-violet: 292;
+}
+/* ============================================================================
+   Layer 2 — semantic tokens. Components read only from here.
+   ============================================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* Canvas + surfaces. Three surface steps is enough: any more and the
+     hierarchy stops being readable. */
+  --canvas: var(--n-50);
+  --canvas-deep: var(--n-100);
+  --surface: var(--n-0);
+  --surface-2: var(--n-25);
+  --surface-3: var(--n-100);
+  --surface-inset: oklch(97% 0.005 276);
+  --surface-translucent: oklch(100% 0 0 / 72%);
+  --surface-overlay: oklch(100% 0 0 / 86%);
+  --scrim: oklch(18% 0.018 276 / 42%);
+
+  /* Hairlines. `-subtle` is the default; `-strong` is for interactive edges. */
+  --border-subtle: oklch(91.4% 0.009 276 / 90%);
+  --border: var(--n-200);
+  --border-strong: var(--n-300);
+  --border-inverse: oklch(100% 0 0 / 12%);
+
+  /* Text. Three steps that carry words, plus one that never does.
+     Contrast-checked against the *deepest* surface each one lands on rather
+     than against --surface: muted and faint both appear on --surface-3
+     (n-100) chips, and checking them against white only flattered them. */
+  --text: var(--n-950);           /* 16.6:1 on n-100 */
+  --text-secondary: var(--n-700);  /* 8.9:1  on n-100 */
+  --text-muted: var(--n-600);      /* 5.5:1  on n-100, 6.3:1 on white */
+  /* Not for text. Hairline ticks, disabled affordances, decorative fills —
+     2.4:1 on white, which no amount of "it's only a caption" makes legible. */
+  --text-faint: var(--n-400);
+  --text-on-accent: var(--n-0);
+  --text-inverse: var(--n-50);
+
+  /* Accent */
+  --accent: var(--b-600);
+  --accent-hover: var(--b-700);
+  --accent-text: var(--b-700);
+  --accent-soft: var(--b-100);
+  --accent-soft-border: var(--b-200);
+  --accent-ring: oklch(53.5% 0.2 276 / 32%);
+  --accent-gradient: linear-gradient(135deg, var(--b-600) 0%, var(--b-500) 55%, oklch(66% 0.17 300) 100%);
+  /* The same sweep, dark enough to put a white 13px label on. The decorative
+     gradient above tops out at 63% and 66% lightness — lovely behind a 48px
+     display heading or a 40px icon tile, but 3.7:1 and 3.3:1 under small text,
+     which is a fail. Both exist because darkening the decorative one would
+     cost the hero its light. */
+  --accent-gradient-strong: linear-gradient(135deg, var(--b-700) 0%, var(--b-600) 55%, oklch(52% 0.19 300) 100%);
+  --accent-glow: 0 0 0 1px oklch(53.5% 0.2 276 / 18%), 0 6px 20px -6px oklch(53.5% 0.2 276 / 42%);
+
+  /* Status */
+  --success: oklch(52% 0.13 var(--h-emerald));
+  --success-soft: oklch(95% 0.04 var(--h-emerald));
+  --warning: oklch(56% 0.13 var(--h-amber));
+  --warning-soft: oklch(95.5% 0.05 var(--h-amber));
+  --danger: oklch(54% 0.19 var(--h-rose));
+  --danger-soft: oklch(95.5% 0.03 var(--h-rose));
+  --info: oklch(52% 0.15 var(--h-sky));
+  --info-soft: oklch(95.5% 0.03 var(--h-sky));
+
+  /* Elevation — two layered shadows so light falls off believably. */
+  --shadow-xs: 0 1px 2px oklch(18% 0.02 276 / 5%);
+  --shadow-sm: 0 1px 2px oklch(18% 0.02 276 / 5%), 0 2px 6px -1px oklch(18% 0.02 276 / 6%);
+  --shadow-md: 0 2px 4px -1px oklch(18% 0.02 276 / 5%), 0 10px 20px -6px oklch(18% 0.02 276 / 10%);
+  --shadow-lg: 0 4px 8px -2px oklch(18% 0.02 276 / 6%), 0 20px 36px -12px oklch(18% 0.02 276 / 14%);
+  --shadow-xl: 0 8px 16px -4px oklch(18% 0.02 276 / 8%), 0 32px 64px -20px oklch(18% 0.02 276 / 20%);
+  --shadow-inset: inset 0 1px 0 oklch(100% 0 0 / 60%);
+
+  /* Blur */
+  --blur-sm: saturate(140%) blur(8px);
+  --blur-md: saturate(150%) blur(16px);
+  --blur-lg: saturate(160%) blur(28px);
+}
+/* ============================================================================
+   Dark theme. Not an inversion — surfaces step *up* in lightness while the
+   accent steps up in lightness too, so contrast is preserved in both
+   directions and nothing glows.
+   ============================================================================ */
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: var(--n-1000);
+  --canvas-deep: oklch(7.5% 0.014 276);
+  --surface: var(--n-950);
+  --surface-2: var(--n-900);
+  --surface-3: var(--n-850);
+  --surface-inset: oklch(11% 0.016 276);
+  --surface-translucent: oklch(13.5% 0.017 276 / 76%);
+  --surface-overlay: oklch(15% 0.017 276 / 92%);
+  --scrim: oklch(6% 0.012 276 / 68%);
+
+  --border-subtle: oklch(100% 0 0 / 7%);
+  --border: oklch(100% 0 0 / 11%);
+  --border-strong: oklch(100% 0 0 / 17%);
+  --border-inverse: oklch(0% 0 0 / 24%);
+
+  --text: oklch(97% 0.004 276);
+  --text-secondary: oklch(80% 0.012 276);
+  --text-muted: oklch(64% 0.016 276); /* 5.2:1 on n-850, 6.4:1 on n-1000 */
+  --text-faint: oklch(50% 0.018 276); /* not for text — see the light theme */
+  --text-on-accent: oklch(14% 0.02 276);
+  --text-inverse: var(--n-950);
+
+  --accent: var(--b-400);
+  --accent-hover: var(--b-300);
+  --accent-text: var(--b-400);
+  --accent-soft: oklch(73% 0.15 276 / 14%);
+  --accent-soft-border: oklch(73% 0.15 276 / 26%);
+  --accent-ring: oklch(73% 0.15 276 / 38%);
+  --accent-gradient: linear-gradient(135deg, var(--b-500) 0%, var(--b-400) 55%, oklch(78% 0.13 300) 100%);
+  /* Dark theme puts near-black ink on the accent instead of white, so the
+     lightness that fails in light mode is exactly what passes here — no
+     darkened twin needed, only the same name so buttons need no branch. */
+  --accent-gradient-strong: var(--accent-gradient);
+  --accent-glow: 0 0 0 1px oklch(73% 0.15 276 / 24%), 0 6px 24px -8px oklch(73% 0.15 276 / 45%);
+
+  --success: oklch(76% 0.15 var(--h-emerald));
+  --success-soft: oklch(76% 0.15 var(--h-emerald) / 15%);
+  --warning: oklch(80% 0.14 var(--h-amber));
+  --warning-soft: oklch(80% 0.14 var(--h-amber) / 15%);
+  --danger: oklch(69% 0.19 var(--h-rose));
+  --danger-soft: oklch(69% 0.19 var(--h-rose) / 15%);
+  --info: oklch(74% 0.14 var(--h-sky));
+  --info-soft: oklch(74% 0.14 var(--h-sky) / 15%);
+
+  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 30%);
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 34%), 0 2px 6px -1px oklch(0% 0 0 / 30%);
+  --shadow-md: 0 2px 4px -1px oklch(0% 0 0 / 36%), 0 10px 20px -6px oklch(0% 0 0 / 46%);
+  --shadow-lg: 0 4px 8px -2px oklch(0% 0 0 / 40%), 0 20px 36px -12px oklch(0% 0 0 / 55%);
+  --shadow-xl: 0 8px 16px -4px oklch(0% 0 0 / 45%), 0 32px 64px -20px oklch(0% 0 0 / 65%);
+  --shadow-inset: inset 0 1px 0 oklch(100% 0 0 / 6%);
+}
+/* ============================================================================
+   Typography, space, radius, motion, layout.
+   ============================================================================ */
+
+:root {
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace,
+    SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* A 1.2-ish ratio at UI sizes, opening up to 1.25 for display. 14px is the
+     UI base — dense enough for a tool surface, still comfortable. */
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-15: 0.9375rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-20: 1.25rem;
+  --fs-24: clamp(1.3rem, 1.15rem + 0.7vw, 1.5rem);
+  --fs-30: clamp(1.5rem, 1.25rem + 1.2vw, 1.875rem);
+  --fs-38: clamp(1.75rem, 1.3rem + 2.2vw, 2.375rem);
+  --fs-48: clamp(2rem, 1.35rem + 3.2vw, 3rem);
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-normal: 1.55;
+  --lh-relaxed: 1.65;
+
+  /* Optical tracking: the larger the type, the tighter it wants to be. */
+  --ls-display: -0.032em;
+  --ls-heading: -0.021em;
+  --ls-body: -0.006em;
+  --ls-label: 0.01em;
+  --ls-caps: 0.075em;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 590;
+  --fw-bold: 680;
+
+  /* 4px base scale. */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-7: 1.75rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-20: 5rem;
+}
+:root {
+  /* Radii. One control radius, one card radius, one shell radius — repeating
+     three values everywhere is what makes a UI look designed. */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-control: 10px;
+  --r-md: 12px;
+  --r-card: 16px;
+  --r-lg: 20px;
+  --r-xl: 26px;
+  --r-pill: 999px;
+
+  /* Control sizing — also the touch-target floor. */
+  --ctl-sm: 32px;
+  --ctl-md: 38px;
+  --ctl-lg: 44px;
+  --tap-min: 44px;
+
+  /* Motion. Short and asymmetric: fast in, slightly slower out. */
+  --dur-instant: 90ms;
+  --dur-fast: 140ms;
+  --dur-base: 200ms;
+  --dur-slow: 300ms;
+  --dur-slower: 460ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.64, 1);
+  --t-fast: var(--dur-fast) var(--ease-out);
+  --t-base: var(--dur-base) var(--ease-out);
+  --t-slow: var(--dur-slow) var(--ease-out);
+
+  /* Focus ring — one definition, used by every focusable thing. */
+  --ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent-ring);
+  --ring-tight: 0 0 0 3px var(--accent-ring);
+
+  /* Stacking order. */
+  --z-base: 1;
+  --z-sticky: 30;
+  --z-drawer: 45;
+  --z-scrim: 44;
+  --z-overlay: 90;
+  --z-toast: 110;
+
+  /* Layout */
+  --sidebar-w: 264px;
+  --topbar-h: 60px;
+  --content-max: 1220px;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+}
+/* ============================================================================
+   Per-tool colour identity.
+
+   Each tool declares `data-accent="violet|rose|amber|emerald|sky"`, which sets a
+   hue + chroma pair. Everything else (icon tile gradient, soft background,
+   hairline, foreground) is derived from that pair, so the five families stay in
+   lockstep and a sixth is two lines of CSS.
+   ============================================================================ */
+
+[data-accent='violet']  { --tool-h: 292; --tool-c: 0.170; }
+[data-accent='rose']    { --tool-h: 16;  --tool-c: 0.185; }
+[data-accent='amber']   { --tool-h: 78;  --tool-c: 0.135; }
+[data-accent='emerald'] { --tool-h: 162; --tool-c: 0.135; }
+[data-accent='sky']     { --tool-h: 235; --tool-c: 0.150; }
+
+[data-accent] {
+  --tool-fg: oklch(49% var(--tool-c) var(--tool-h));
+  --tool-soft: oklch(96.5% calc(var(--tool-c) * 0.2) var(--tool-h));
+  --tool-border: oklch(89% calc(var(--tool-c) * 0.36) var(--tool-h));
+  --tool-grad: linear-gradient(
+    142deg,
+    oklch(57% var(--tool-c) var(--tool-h)) 0%,
+    oklch(70% calc(var(--tool-c) * 0.82) calc(var(--tool-h) + 16)) 100%
+  );
+  --tool-glow: 0 4px 14px -6px oklch(57% var(--tool-c) var(--tool-h) / 55%);
+}
+
+:root[data-theme='dark'] [data-accent] {
+  --tool-fg: oklch(79% calc(var(--tool-c) * 0.9) var(--tool-h));
+  --tool-soft: oklch(70% var(--tool-c) var(--tool-h) / 14%);
+  --tool-border: oklch(70% var(--tool-c) var(--tool-h) / 26%);
+  --tool-grad: linear-gradient(
+    142deg,
+    oklch(62% var(--tool-c) var(--tool-h)) 0%,
+    oklch(74% calc(var(--tool-c) * 0.82) calc(var(--tool-h) + 16)) 100%
+  );
+  --tool-glow: 0 4px 16px -6px oklch(62% var(--tool-c) var(--tool-h) / 45%);
+}
+
+/* Default so a component without data-accent still resolves to the brand. */
+:root {
+  --tool-h: 276;
+  --tool-c: 0.2;
+  --tool-fg: var(--accent-text);
+  --tool-soft: var(--accent-soft);
+  --tool-border: var(--accent-soft-border);
+  --tool-grad: var(--accent-gradient);
+  --tool-glow: var(--accent-glow);
+}

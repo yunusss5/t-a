@@ -1,0 +1,441 @@
+/* ============================================================================
+   home.css — dashboard: hero, catalogue toolbar, tool cards.
+   ============================================================================ */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+
+/* ------------------------------------------------------------------ Hero ---- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.5rem, 3.5vw, 2.75rem);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  /* `both` so the hero is not painted at full opacity for one frame before the
+     animation starts — that flash is what makes an entrance feel cheap. */
+  animation: rise-in var(--dur-slow) var(--ease-out) both;
+}
+
+/* A single soft accent bloom in the top-right corner. One light source, low
+   opacity — enough to lift the card, not enough to read as decoration. */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -45%;
+  right: -8%;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 66%);
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+:root[data-theme='dark'] .hero::after {
+  opacity: 0.2;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 26px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--accent-soft-border);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.hero h1 {
+  margin: var(--sp-4) 0 var(--sp-3);
+  max-width: 24ch;
+  font-size: var(--fs-48);
+  line-height: 1.06;
+  letter-spacing: var(--ls-display);
+}
+
+/* The one gradient in the type, on three words. Any more and it stops reading
+   as emphasis. `background-clip: text` needs the transparent fill. */
+.grad-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.hero-sub {
+  max-width: 58ch;
+  font-size: var(--fs-15);
+  line-height: var(--lh-relaxed);
+  color: var(--text-secondary);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+
+.hero-cta {
+  min-height: var(--ctl-lg);
+  padding: 0 var(--sp-5);
+  font-size: var(--fs-14);
+}
+
+/* ------------------------------------------------------------- Catalogue ---- */
+
+.catalogue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* Sticky so the filters stay reachable while scrolling 23 cards. The blurred
+   background is what stops cards showing through. */
+.catalogue-bar {
+  position: sticky;
+  top: var(--topbar-h);
+  z-index: var(--z-base);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  background: var(--canvas);
+}
+
+.search-shell {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: 1 1 260px;
+  max-width: 400px;
+  min-height: var(--ctl-lg);
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.search-shell:hover {
+  border-color: var(--border-strong);
+}
+
+.search-shell:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--ring-tight);
+}
+
+.search-shell input {
+  flex: 1;
+  min-width: 0;
+  /* Fill the pill rather than sitting as a 24px line in the middle of it: the
+     shell is 44px tall and looks tappable everywhere, so it should be. */
+  align-self: stretch;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-size: var(--fs-14);
+  outline: none;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ctl-sm);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--t-fast), color var(--t-fast),
+    border-color var(--t-fast);
+}
+
+.filter-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+/* Active filter is a solid fill, not the gradient — the gradient is reserved
+   for the single primary action on the page. */
+.filter-chip.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--surface);
+}
+
+/* ------------------------------------------------------------ Tool cards ---- */
+
+.tool-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(262px, 1fr));
+  gap: var(--sp-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tool-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  height: 100%;
+  padding: var(--sp-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: inherit;
+  overflow: hidden;
+  transition: transform var(--t-fast), border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+
+/* The whole card is clickable, but only the title is the anchor: its ::after
+   stretches over the card. That keeps the favourite star a real sibling button
+   — a <button> nested inside an <a> is invalid and unreliable for assistive
+   tech — without shrinking the hit area. */
+.tool-card-link {
+  color: inherit;
+  border-radius: var(--r-xs);
+}
+
+.tool-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+}
+
+/* Ring the card rather than just the words in the title. */
+.tool-card:has(.tool-card-link:focus-visible) {
+  border-color: var(--tool-border);
+  box-shadow: var(--ring);
+}
+
+.tool-card-link:focus-visible {
+  box-shadow: none;
+}
+
+.tool-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--tool-border);
+  box-shadow: var(--shadow-lg);
+  color: inherit;
+}
+
+/* The tool's own hue washes in from the top-left on hover. Painting a
+   pseudo-element's opacity keeps this off the compositor's critical path. */
+.tool-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    130% 100% at 0% 0%,
+    var(--tool-soft) 0%,
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity var(--t-base);
+  pointer-events: none;
+}
+
+.tool-card:hover::before {
+  opacity: 1;
+}
+
+.tool-card-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--r-md);
+  background: var(--tool-grad);
+  color: #fff;
+  box-shadow: var(--tool-glow);
+  transition: transform var(--t-base);
+}
+
+.tool-card:hover .tool-card-icon {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.tool-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.tool-card-body h3 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  /* Room for the favourite button, which is absolutely positioned. */
+  padding-right: var(--sp-8);
+}
+
+.tool-card-body p {
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+.tool-card-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: auto;
+  padding-top: var(--sp-2);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.tool-card-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px var(--sp-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xs);
+  background: var(--surface-2);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-label);
+}
+
+.tool-card-arrow {
+  margin-left: auto;
+  color: var(--tool-fg);
+  opacity: 0;
+  translate: -6px 0;
+  transition: opacity var(--t-base), translate var(--t-base);
+}
+
+.tool-card:hover .tool-card-arrow {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* --------------------------------------------------------- Favourite star ---- */
+
+.fav-btn {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--t-fast), background-color var(--t-fast),
+    transform var(--dur-instant) var(--ease-out);
+}
+
+.fav-btn:hover {
+  background: var(--surface-3);
+  color: var(--warning);
+}
+
+.fav-btn:active {
+  transform: scale(0.88);
+}
+
+.fav-btn.active {
+  color: var(--warning);
+}
+
+.fav-btn.active svg {
+  fill: currentColor;
+}
+
+/* On the tool page the star sits inline in the header, not over a card. */
+.fav-btn.static {
+  position: static;
+  width: var(--ctl-md);
+  height: var(--ctl-md);
+  border-color: var(--border);
+  background: var(--surface);
+  border-radius: var(--r-control);
+}
+
+/* ------------------------------------------------------------ Responsive ---- */
+
+@media (max-width: 640px) {
+  .home {
+    gap: var(--sp-6);
+  }
+
+  .hero {
+    padding: var(--sp-5) var(--sp-4);
+  }
+
+  .hero h1 {
+    max-width: none;
+  }
+
+  .hero-actions > .ui-btn {
+    flex: 1 1 100%;
+  }
+
+  /* Two chips per row beats a horizontally scrolling filter bar on a phone. */
+  .catalogue-bar {
+    position: static;
+    padding: 0;
+  }
+
+  .search-shell {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+
+  .tool-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hover affordances can't be reached by touch, so show them outright. */
+  .tool-card-arrow {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (min-width: 1600px) {
+  .tool-cards {
+    grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+    gap: var(--sp-4);
+  }
+}
+

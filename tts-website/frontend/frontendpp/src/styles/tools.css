@@ -1,0 +1,281 @@
+/* ============================================================================
+   tools.css — the tool page frame. Everything inside a tool is styled by
+   components.css; this file only owns the page header, the lazy-load state and
+   the 404.
+   ============================================================================ */
+
+.tool-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* ------------------------------------------------------------- Tool header ---- */
+
+.tool-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  align-self: flex-start;
+  min-height: var(--ctl-sm);
+  padding: 0 var(--sp-2) 0 0;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+  border-radius: var(--r-xs);
+  transition: color var(--t-fast), gap var(--t-fast);
+}
+
+.back-link:hover {
+  color: var(--text);
+  gap: var(--sp-3);
+}
+
+.tool-head-main {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.tool-head-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: var(--r-md);
+  background: var(--tool-grad);
+  color: #fff;
+  box-shadow: var(--tool-glow);
+}
+
+.tool-head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-head-main h1 {
+  font-size: var(--fs-24);
+  letter-spacing: var(--ls-display);
+}
+
+.tool-head-main p {
+  margin-top: 2px;
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  max-width: 70ch;
+}
+
+/* ---------------------------------------------------------- Loading + 404 ---- */
+
+/* The lazy-chunk fallback occupies a fixed minimum height so swapping in the
+   real tool doesn't jolt the page. */
+.tool-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  min-height: 320px;
+  color: var(--text-muted);
+  font-size: var(--fs-13);
+}
+
+.tool-loading svg {
+  color: var(--tool-fg);
+}
+
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  min-height: 52vh;
+  padding: var(--sp-8) var(--sp-4);
+  text-align: center;
+}
+
+.not-found-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-lg);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
+  color: var(--accent-text);
+}
+
+.not-found-code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
+
+.not-found h1,
+.not-found h2 {
+  font-size: var(--fs-24);
+  letter-spacing: var(--ls-display);
+}
+
+.not-found p {
+  max-width: 48ch;
+  font-size: var(--fs-14);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+}
+
+.not-found .btn-row {
+  margin-top: var(--sp-2);
+}
+
+.not-found-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding: 0;
+  list-style: none;
+}
+
+/* Carries a class rather than being selected as `.not-found-links a`, so the
+   prose underline rule in base.css leaves it alone. */
+.not-found-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ctl-sm);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--tool-border);
+  border-radius: var(--r-pill);
+  background: var(--tool-soft);
+  color: var(--tool-fg);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+.not-found-link:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  color: var(--tool-fg);
+}
+
+/* -------------------------------------------------------- Related linking ---- */
+
+/* Internal links out of every tool page: useful to a reader, and the only way
+   a crawler discovers sibling tools without walking the sidebar. */
+.related {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.related h2 {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--sp-2);
+  padding: 0;
+  list-style: none;
+}
+
+.related-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color var(--t-fast), transform var(--t-fast),
+    box-shadow var(--t-fast);
+}
+
+.related-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--tool-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+}
+
+.related-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: var(--tool-soft);
+  border: 1px solid var(--tool-border);
+  color: var(--tool-fg);
+}
+
+.related-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.related-card > svg {
+  flex: none;
+  color: var(--text-muted);
+  transition: translate var(--t-fast), color var(--t-fast);
+}
+
+.related-card:hover > svg {
+  translate: 3px 0;
+  color: var(--tool-fg);
+}
+
+.related-card strong {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+}
+
+.related-card small {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ Responsive ---- */
+
+@media (max-width: 640px) {
+  .tool-head-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .tool-head-main {
+    gap: var(--sp-3);
+    align-items: flex-start;
+  }
+
+  .tool-head-main h1 {
+    font-size: var(--fs-20);
+  }
+}

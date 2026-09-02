@@ -4,6 +4,7 @@ clean plain text that's ready to be sent to the TTS engine.
 
 Supports:
   - .txt  (plain text, used as-is)
+  - .md   (markdown — read as plain text; the marks are harmless to narrate)
   - .srt  (SubRip subtitles — timestamps & sequence numbers stripped)
   - .vtt  (WebVTT subtitles — timestamps & headers stripped)
 """
@@ -78,13 +79,17 @@ def parse_transcript_file(filename: str, raw_bytes: bytes) -> str:
     """
     Dispatch to the right parser based on file extension.
     Raises ValueError for unsupported types.
+
+    The extension is only a hint about the *shape* of the text: uploads.py has
+    already refused anything outside the allowed list, so this never sees a
+    binary format it would have to guess at.
     """
     lower = filename.lower()
     if lower.endswith(".srt"):
         return parse_srt(raw_bytes)
     elif lower.endswith(".vtt"):
         return parse_vtt(raw_bytes)
-    elif lower.endswith(".txt"):
+    elif lower.endswith((".txt", ".md")):
         return parse_txt(raw_bytes)
     else:
-        raise ValueError(f"Unsupported file type: {filename}. Use .txt, .srt, or .vtt")
+        raise ValueError(f"Unsupported file type: {filename}. Use .txt, .md, .srt, or .vtt")

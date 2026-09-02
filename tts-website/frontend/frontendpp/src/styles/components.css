@@ -1,0 +1,2004 @@
+/* ============================================================================
+   components.css — the shared vocabulary every tool page is built from.
+
+   Rules here may only read Layer 2 tokens from tokens.css. If a value looks
+   like it wants to be hard-coded, it belongs in tokens.css instead.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------- Panel ---- */
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  transition: border-color var(--t-base), box-shadow var(--t-base),
+    background-color var(--t-base);
+}
+
+/* A 1px highlight along the top edge reads as light falling on the card. It is
+   the cheapest way to make a flat surface feel physical. */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: var(--r-card) var(--r-card) 0 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(100% 0 0 / 70%) 18%,
+    oklch(100% 0 0 / 70%) 82%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+:root[data-theme='dark'] .panel::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(100% 0 0 / 9%) 18%,
+    oklch(100% 0 0 / 9%) 82%,
+    transparent
+  );
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.panel-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  color: var(--text);
+}
+
+.panel-hint {
+  margin-top: 2px;
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  max-width: 62ch;
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+}
+
+/* ---------------------------------------------------------------- Field ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-label);
+  color: var(--text-secondary);
+}
+
+.field-hint {
+  font-weight: var(--fw-normal);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.field-row {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.field-row > * {
+  flex: 1 1 190px;
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------- Buttons ---- */
+
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--ctl-md);
+  padding: 0 var(--sp-4);
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  /* Only transform/opacity/colour animate, so this never triggers layout. */
+  transition: background-color var(--t-fast), border-color var(--t-fast),
+    color var(--t-fast), box-shadow var(--t-fast), transform var(--dur-instant) var(--ease-out);
+}
+
+.ui-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ui-btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Primary — the gradient plus a coloured glow is the one loud thing in the UI,
+   so it only ever appears once per view. The -strong sweep, not the decorative
+   one: this is the only place the gradient sits under real 13px text. */
+.ui-btn-primary {
+  background: var(--accent-gradient-strong);
+  color: var(--text-on-accent);
+  box-shadow: var(--accent-glow);
+}
+
+.ui-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 0 1px oklch(53.5% 0.2 276 / 26%), 0 8px 26px -8px oklch(53.5% 0.2 276 / 55%);
+  filter: brightness(1.04);
+}
+
+.ui-btn-soft {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  border-color: var(--accent-soft-border);
+}
+
+.ui-btn-soft:hover:not(:disabled) {
+  background: var(--b-200);
+  border-color: var(--b-300);
+}
+
+:root[data-theme='dark'] .ui-btn-soft:hover:not(:disabled) {
+  background: oklch(73% 0.15 276 / 22%);
+  border-color: oklch(73% 0.15 276 / 36%);
+}
+
+.ui-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+.ui-btn-ghost:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.ui-btn-quiet {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0 var(--sp-2);
+}
+
+.ui-btn-quiet:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.ui-btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in oklch, var(--danger) 28%, transparent);
+}
+
+.ui-btn-danger:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--danger) 16%, var(--surface));
+}
+
+.ui-btn-lg {
+  min-height: var(--ctl-lg);
+  padding: 0 var(--sp-5);
+  font-size: var(--fs-14);
+}
+
+.ui-btn-sm {
+  min-height: var(--ctl-sm);
+  padding: 0 var(--sp-3);
+  font-size: var(--fs-12);
+}
+
+.ui-btn-block {
+  width: 100%;
+}
+
+/* A row of actions. `.end` right-aligns it; both wrap on narrow screens. */
+.btn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.btn-row.end {
+  justify-content: flex-end;
+}
+
+/* ------------------------------------------------------------- Icon button -- */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ctl-md);
+  height: var(--ctl-md);
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--t-fast), color var(--t-fast),
+    border-color var(--t-fast), transform var(--dur-instant) var(--ease-out);
+}
+
+.icon-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--border-subtle);
+  color: var(--text);
+}
+
+.icon-btn:active {
+  transform: scale(0.94);
+}
+
+/* Touch pointers get the full 44px target without changing the visual box. */
+@media (pointer: coarse) {
+  .icon-btn::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: var(--tap-min);
+    height: var(--tap-min);
+    transform: translate(-50%, -50%);
+  }
+
+  .icon-btn {
+    position: relative;
+  }
+}
+
+/* ---------------------------------------------------------------- Inputs ---- */
+
+.ui-input,
+.ui-textarea,
+.select-shell > select {
+  width: 100%;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  font-size: var(--fs-14);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast),
+    background-color var(--t-fast);
+}
+
+.ui-input,
+.select-shell > select {
+  min-height: var(--ctl-lg);
+  padding: 0 var(--sp-3);
+}
+
+.ui-textarea {
+  padding: var(--sp-3);
+  line-height: var(--lh-relaxed);
+  min-height: 120px;
+}
+
+.ui-input:hover,
+.ui-textarea:hover,
+.select-shell > select:hover {
+  border-color: var(--border-strong);
+}
+
+.ui-input:focus,
+.ui-textarea:focus,
+.select-shell > select:focus {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: var(--ring-tight);
+}
+
+.ui-input:disabled,
+.ui-textarea:disabled,
+.select-shell > select:disabled {
+  background: var(--surface-3);
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
+}
+
+.ui-input[aria-invalid='true'],
+.ui-textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+/* Textarea + live counter. The counter sits inside the padding box so it never
+   overlaps text: the textarea reserves room for it. */
+.textarea-shell {
+  position: relative;
+}
+
+.textarea-shell .ui-textarea {
+  padding-bottom: var(--sp-7);
+}
+
+.textarea-counter {
+  position: absolute;
+  right: var(--sp-3);
+  bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  padding-left: var(--sp-2);
+  pointer-events: none;
+}
+
+.ui-textarea:focus + .textarea-counter {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+/* Custom select chevron, drawn as a background so no extra element is needed. */
+.select-shell {
+  position: relative;
+}
+
+.select-shell > select {
+  appearance: none;
+  padding-right: var(--sp-8);
+  cursor: pointer;
+}
+
+.select-shell::after {
+  content: '';
+  position: absolute;
+  right: var(--sp-3);
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -3px;
+  border-right: 1.6px solid var(--text-muted);
+  border-bottom: 1.6px solid var(--text-muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------- Segmented ---- */
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  /* A seven-option row does not fit a phone. It scrolls rather than wraps, so
+     the control keeps its shape; the scrollbar is hidden because a 3px-padded
+     pill has nowhere to put one, and Segmented keeps the selected option in
+     view so the state is never scrolled out of sight. */
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: inline proximity;
+  /* A swipe that reaches the end stops there instead of scrolling the page. */
+  overscroll-behavior-inline: contain;
+}
+
+.segmented::-webkit-scrollbar {
+  display: none;
+}
+
+.segmented-item {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 34px;
+  padding: 0 var(--sp-3);
+  border-radius: calc(var(--r-md) - 4px);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+  white-space: nowrap;
+  scroll-snap-align: center;
+  cursor: pointer;
+  transition: color var(--t-fast), background-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+
+.segmented-item:hover:not(.active) {
+  color: var(--text);
+}
+
+.segmented-item.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-xs);
+}
+
+:root[data-theme='dark'] .segmented-item.active {
+  background: var(--surface-3);
+}
+
+.segmented-sm .segmented-item {
+  min-height: 28px;
+  font-size: var(--fs-12);
+}
+
+/* ----------------------------------------------------------------- Range ---- */
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* A 4px track is what should be seen; it is a miserable thing to hit. The input
+   keeps a finger-sized height and the track is painted by the pseudo-element,
+   so the visual stays 4px while the target clears the 24px minimum. */
+.range-row input[type='range'] {
+  flex: 1;
+  appearance: none;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.range-row input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+}
+
+.range-row input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+}
+
+/* Styling the track stops Chrome centring the thumb for us, so it is nudged up
+   by half the difference: (4 - 18) / 2. Firefox centres its own. */
+.range-row input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t-fast);
+}
+
+.range-row input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.range-row input[type='range']:hover::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+
+.range-value {
+  min-width: 4.5ch;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* ----------------------------------------------------------------- Chips ---- */
+
+.chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 30px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--t-fast), border-color var(--t-fast),
+    color var(--t-fast), transform var(--dur-instant) var(--ease-out);
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.chip:active {
+  transform: translateY(0);
+}
+
+.chip-accent {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-border);
+  color: var(--accent-text);
+}
+
+.chip-accent:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.chip-muted {
+  background: transparent;
+}
+
+.chip-badge {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- Copy rows ---- */
+
+.copy-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  transition: border-color var(--t-fast), background-color var(--t-fast);
+}
+
+.copy-row:hover {
+  border-color: var(--border-strong);
+}
+
+.copy-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.copy-row-label {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.copy-row-value {
+  font-size: var(--fs-14);
+  line-height: var(--lh-snug);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.copy-row-value.pre {
+  white-space: pre-wrap;
+  font-size: var(--fs-13);
+  line-height: var(--lh-relaxed);
+  color: var(--text-secondary);
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.copy-row-meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+/* Tone is carried by a left edge, not a fill — a coloured wash on every row
+   would make the results page look like a highlighter accident. */
+.copy-row.tone-good {
+  border-left: 2px solid var(--success);
+}
+
+.copy-row.tone-warn {
+  border-left: 2px solid var(--warning);
+}
+
+.copy-row.tone-bad {
+  border-left: 2px solid var(--danger);
+}
+
+.copy-row.tone-good .copy-row-meta { color: var(--success); }
+.copy-row.tone-warn .copy-row-meta { color: var(--warning); }
+.copy-row.tone-bad .copy-row-meta { color: var(--danger); }
+
+/* ----------------------------------------------------------------- Stats ---- */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--sp-2);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+}
+
+.stat-value {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: var(--lh-tight);
+}
+
+.stat-label {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stat-hint {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.stat-good .stat-value { color: var(--success); }
+.stat-warn .stat-value { color: var(--warning); }
+.stat-bad .stat-value { color: var(--danger); }
+
+/* ------------------------------------------------------------ Score ring ---- */
+
+.score-block {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+}
+
+.score-ring {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.score-ring > svg {
+  overflow: visible;
+}
+
+.ring-track {
+  stroke: var(--surface-3);
+}
+
+.ring-value {
+  stroke: var(--accent);
+  /* Animate the dash so the gauge fills once on arrival. */
+  transition: stroke-dashoffset var(--dur-slower) var(--ease-out),
+    stroke var(--t-base);
+}
+
+.score-good .ring-value { stroke: var(--success); }
+.score-ok .ring-value { stroke: var(--warning); }
+.score-low .ring-value { stroke: var(--danger); }
+
+.score-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.score-center strong {
+  font-size: var(--fs-30);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.score-center span {
+  font-size: var(--fs-11);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------- Check list ---- */
+
+.check-list {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  color: var(--text-secondary);
+}
+
+.check-mark {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  flex: none;
+  margin-top: 1px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+.check-list .pass .check-mark {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.check-list .fail .check-mark {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.check-list .fail {
+  color: var(--text);
+}
+
+/* -------------------------------------------------------------- Dropzone ---- */
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-7) var(--sp-5);
+  text-align: center;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-inset);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background-color var(--t-fast),
+    color var(--t-fast);
+}
+
+.dropzone:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dropzone.dragging {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: var(--ring-tight);
+}
+
+.dropzone.has-file {
+  border-style: solid;
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.dropzone-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-text);
+  box-shadow: var(--shadow-xs);
+}
+
+.dropzone.has-file .dropzone-icon {
+  color: var(--success);
+}
+
+.dropzone-title {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.dropzone-hint {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  max-width: 46ch;
+}
+
+/* ----------------------------------------------------------- Empty states ---- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-10) var(--sp-5);
+  text-align: center;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--r-lg);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
+  color: var(--accent-text);
+}
+
+.empty-title {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  color: var(--text);
+}
+
+.empty-body {
+  font-size: var(--fs-13);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  max-width: 46ch;
+}
+
+/* ------------------------------------------------------------- Note lines ---- */
+
+.muted-line {
+  font-size: var(--fs-13);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+}
+
+.muted-line.center {
+  text-align: center;
+  padding: var(--sp-8) var(--sp-4);
+}
+
+.hint {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.inline-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-sm);
+  background: var(--info-soft);
+  border: 1px solid color-mix(in oklch, var(--info) 24%, transparent);
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+}
+
+/* Errors get a role="alert" in the markup; this is only the paint. */
+.error-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-sm);
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in oklch, var(--danger) 30%, transparent);
+  color: var(--danger);
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+}
+
+.footnote {
+  font-size: var(--fs-12);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* -------------------------------------------------------------- Skeletons ---- */
+
+/* A skeleton must occupy the *exact* box the real content will, otherwise the
+   swap causes a layout shift — which is the thing skeletons exist to prevent. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(100% 0 0 / 55%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+:root[data-theme='dark'] .skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(100% 0 0 / 7%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+.skeleton-text {
+  height: 0.85em;
+  margin: 0.28em 0;
+}
+
+.skeleton-text:last-child {
+  width: 65%;
+}
+
+.skeleton-block {
+  height: 120px;
+  border-radius: var(--r-md);
+}
+
+.skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+/* --------------------------------------------------------------- Progress ---- */
+
+.meter {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-gradient);
+  /* Width is the only animated property, and it is on a 6px-tall element, so
+     the paint cost is negligible. */
+  transition: width var(--t-base);
+}
+
+/* ----------------------------------------------------------------- Alerts ---- */
+
+.alert {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-relaxed);
+  text-align: left;
+}
+
+.alert-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  /* Optical alignment with the first line of text rather than the box. */
+  margin-top: 1px;
+  color: var(--text-muted);
+}
+
+.alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.alert-title {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+.alert-text {
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* Tones borrow the status hues from tokens.css. The tinted background carries
+   the meaning together with the icon and the wording — never colour alone.
+   Borders are mixed from the tone itself so there is no second set of tokens to
+   keep in step with the first. */
+.alert-danger {
+  border-color: color-mix(in oklch, var(--danger) 34%, transparent);
+  background: var(--danger-soft);
+}
+
+.alert-danger .alert-icon,
+.alert-danger .alert-title {
+  color: var(--danger);
+}
+
+.alert-warning {
+  border-color: color-mix(in oklch, var(--warning) 34%, transparent);
+  background: var(--warning-soft);
+}
+
+.alert-warning .alert-icon,
+.alert-warning .alert-title {
+  color: var(--warning);
+}
+
+.alert-success {
+  border-color: color-mix(in oklch, var(--success) 34%, transparent);
+  background: var(--success-soft);
+}
+
+.alert-success .alert-icon,
+.alert-success .alert-title {
+  color: var(--success);
+}
+
+.alert-info {
+  border-color: var(--accent-soft-border);
+  background: var(--accent-soft);
+}
+
+.alert-info .alert-icon,
+.alert-info .alert-title {
+  color: var(--accent-text);
+}
+
+/* ---------------------------------------------------------------- Switch ---- */
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  /* 44px keeps the whole row a comfortable touch target, label included. */
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Clipped, not display:none — a hidden input is not focusable, and this control
+   relies on the real checkbox for its role, state and keyboard handling. */
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.switch-track {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  transition: background-color var(--t-fast), border-color var(--t-fast);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  /* --t-base already carries the easing; a second one here would make the
+     shorthand invalid, and the knob would jump rather than slide. */
+  transition: transform var(--t-base);
+}
+
+.switch-input:checked + .switch-track {
+  background: var(--tool-fg, var(--accent));
+  border-color: transparent;
+}
+
+.switch-input:checked + .switch-track .switch-knob {
+  transform: translateX(18px);
+}
+
+.switch-input:focus-visible + .switch-track {
+  box-shadow: var(--ring);
+}
+
+.switch-text {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-13);
+  color: var(--text);
+}
+
+.switch-text small {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------- Badges + kbd ---- */
+
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 var(--sp-2);
+  margin-left: var(--sp-2);
+  border-radius: var(--r-xs);
+  background: var(--tool-soft);
+  border: 1px solid var(--tool-border);
+  color: var(--tool-fg);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--r-xs);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+}
+
+/* ------------------------------------------------------------ Data display ---- */
+
+.code-block,
+.mono-out {
+  margin: 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  line-height: var(--lh-relaxed);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.kv-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  font-size: var(--fs-13);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.kv-row:last-child {
+  border-bottom: 0;
+}
+
+.kv-row > span:first-child {
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kv-row > span:last-child {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  transition: background-color var(--t-fast);
+}
+
+.list-row:hover {
+  background: var(--surface-3);
+}
+
+.list-row-index {
+  flex: none;
+  min-width: 4.5ch;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-text);
+  font-weight: var(--fw-medium);
+}
+
+.list-row-body {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+}
+
+.ui-table {
+  font-size: var(--fs-13);
+}
+
+.ui-table th,
+.ui-table td {
+  padding: var(--sp-2) var(--sp-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.ui-table th {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  position: sticky;
+  top: 0;
+}
+
+.ui-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ui-table tbody tr:hover td {
+  background: var(--surface-2);
+}
+
+/* ---------------------------------------------------------------- Media ---- */
+
+.media-preview {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-inset);
+  /* Reserving the ratio up front means loading a thumbnail costs no CLS. */
+  aspect-ratio: 16 / 9;
+}
+
+.media-preview img,
+.media-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--sp-3);
+}
+
+.thumb-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  transition: border-color var(--t-fast), transform var(--t-fast);
+}
+
+.thumb-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.thumb-card img {
+  width: 100%;
+  border-radius: var(--r-xs);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--surface-3);
+}
+
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--sp-2);
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: transform var(--t-fast), border-color var(--t-fast);
+}
+
+.swatch:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+.swatch-fill {
+  height: 54px;
+}
+
+.swatch-label {
+  padding: var(--sp-1) var(--sp-2) var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.color-hero {
+  height: 120px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-subtle);
+}
+
+/* --------------------------------------------------------------- Tooltip ---- */
+
+/* CSS-only, so it costs no JS and cannot get stuck open. `aria-label` on the
+   trigger carries the same text for screen readers. */
+.tip {
+  position: relative;
+}
+
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 4px;
+  z-index: var(--z-overlay);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-xs);
+  background: var(--n-900);
+  color: var(--n-50);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast), translate var(--t-fast);
+}
+
+.tip:hover::after,
+.tip:focus-visible::after {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+:root[data-theme='dark'] .tip::after {
+  background: var(--n-200);
+  color: var(--n-1000);
+}
+
+/* ------------------------------------------------------------- Tool layout ---- */
+
+/* Inputs left, results right. `align-items: start` keeps each column's cards
+   at their natural height instead of stretching one to match the other. */
+.tool-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: start;
+  gap: var(--sp-5);
+}
+
+.tool-grid > .stack {
+  gap: var(--sp-4);
+}
+
+/* On a single column the results must follow the inputs, which is already the
+   DOM order — so no order juggling, and no risk of a confusing tab sequence. */
+@media (max-width: 1080px) {
+  .tool-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tool-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 820px;
+}
+
+.page-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.subtitle {
+  font-size: var(--fs-14);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+/* ---------------------------------------------------------------- Inputs 2 ---- */
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.input-row > .ui-input {
+  flex: 1 1 140px;
+}
+
+.unit {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  flex: none;
+}
+
+/* Checkbox row with a proper 44px hit area on touch. */
+/* A drawn checkbox. The native control is clipped (not hidden) so it keeps its
+   role, state and keyboard handling, and .check-box is what gets painted. */
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  /* 44px including the label, so the whole row is a comfortable touch target. */
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.check.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.check-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.check-box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 19px;
+  height: 19px;
+  border-radius: var(--r-xs);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: transparent;
+  transition:
+    background-color var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast);
+}
+
+.check:hover .check-box {
+  border-color: var(--tool-fg, var(--accent));
+}
+
+.check-input:checked + .check-box {
+  background: var(--tool-fg, var(--accent));
+  border-color: transparent;
+  color: var(--text-on-accent);
+}
+
+.check-input:focus-visible + .check-box {
+  box-shadow: var(--ring);
+}
+
+.check-input:disabled + .check-box {
+  border-color: var(--border-subtle);
+}
+
+/* The tick is drawn at 13px inside a 19px box; scaling it in on check reads as
+   the box confirming rather than the icon simply appearing. */
+.check-box svg {
+  transform: scale(0.6);
+  transition: transform var(--t-base);
+}
+
+.check-input:checked + .check-box svg {
+  transform: scale(1);
+}
+
+.check-text {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-13);
+  color: var(--text);
+}
+
+.check-text small {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------------- Status ---- */
+
+.status {
+  padding: var(--sp-3);
+  border-radius: var(--r-sm);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+}
+
+.status.green {
+  background: var(--success-soft);
+  border-color: color-mix(in oklch, var(--success) 26%, transparent);
+  color: var(--success);
+}
+
+.status.error {
+  background: var(--danger-soft);
+  border-color: color-mix(in oklch, var(--danger) 28%, transparent);
+  color: var(--danger);
+}
+
+/* ------------------------------------------------------------- Note lists ---- */
+
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* A row, not a column: the markup is a select button beside a delete button,
+   and stacking them put the bin underneath the title while the title and its
+   timestamp ran together on one ellipsised line. */
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding-right: var(--sp-2);
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  transition: background-color var(--t-fast), border-color var(--t-fast);
+}
+
+.note-item:hover {
+  background: var(--surface-2);
+}
+
+.note-item.active {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-border);
+}
+
+/* The padding lives on the button rather than the row, so the whole height of
+   the row is what a finger has to hit — the two lines of text alone came to
+   19px, well under the 24px minimum. */
+.note-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-2) var(--sp-3);
+  text-align: left;
+  cursor: pointer;
+}
+
+.note-item-body > strong {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+.note-item-body > small {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.note-item-body > strong,
+.note-item-body > small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------- Audio ---- */
+
+.audio-player-wrap {
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+}
+
+.audio-player-wrap audio {
+  width: 100%;
+}
+
+/* The native player has no themeable internals, so we only correct its scale. */
+audio {
+  height: 40px;
+}
+
+/* --------------------------------------------------- Small-screen density ---- */
+
+/* Cards keep their radius but lose some padding — on a 360px viewport, 20px of
+   padding on both sides is a fifth of the screen. */
+@media (max-width: 640px) {
+  .panel {
+    padding: var(--sp-4);
+    gap: var(--sp-3);
+  }
+
+  .ui-btn {
+    min-height: var(--ctl-lg);
+  }
+
+  .btn-row > .ui-btn {
+    flex: 1 1 auto;
+  }
+
+  .stat-row {
+    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  }
+
+  .score-block {
+    justify-content: center;
+    gap: var(--sp-4);
+  }
+
+  .copy-row-value.pre {
+    max-height: 240px;
+  }
+
+  /* Tooltips have nowhere to go on a phone, and touch has no hover anyway. */
+  .tip::after {
+    display: none;
+  }
+}
+
+/* Very wide screens: stop the two columns from becoming unreadably wide. */
+@media (min-width: 1600px) {
+  .tool-grid {
+    gap: var(--sp-6);
+  }
+}
+
+/* -------------------------------------------------------------------- AI ---- */
+
+/* The "no model connected" panel. Laid out as icon + column so the explanation
+   reads as an informative state rather than an error banner. */
+.ai-offline {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: flex-start;
+}
+
+.ai-offline-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-md);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.ai-offline-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  color: var(--text);
+}
+
+.ai-offline-body {
+  font-size: var(--fs-13);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  max-width: 60ch;
+}
+
+/* The self-host instructions: collapsed by default, because someone who already
+   has a model connected never needs them. */
+.ai-offline-how {
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.ai-offline-how > summary {
+  cursor: pointer;
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  min-height: var(--ctl-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  border-radius: var(--r-xs);
+  /* Both lines are needed to drop the OS triangle: `list-style` covers Firefox
+     and current Chrome, the pseudo-element covers older WebKit. */
+  list-style: none;
+}
+
+.ai-offline-how > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ai-offline-caret {
+  flex: none;
+  color: var(--text-muted);
+  transition: transform var(--t-base), color var(--t-fast);
+}
+
+.ai-offline-how > summary:hover .ai-offline-caret {
+  color: var(--text);
+}
+
+.ai-offline-how[open] > summary .ai-offline-caret {
+  transform: rotate(180deg);
+}
+
+/* `<details>` snaps open with no transition of its own. The content slides and
+   fades rather than the panel animating its height: the height keyframe would
+   have to run on `height`, which is a layout property, and this reveal sits
+   inside a scrolling column where that is the expensive way to do it. */
+.ai-offline-how[open] > .ai-offline-how-body {
+  animation: disclose var(--dur-base) var(--ease-out) both;
+}
+
+/* Flex so the closing note is separated from the last step. As sibling blocks
+   under `<details>` they sat flush against each other. */
+.ai-offline-how-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+@keyframes disclose {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-offline-how > summary:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-tight);
+}
+
+.ai-offline-how ol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  padding-left: var(--sp-5);
+  line-height: var(--lh-relaxed);
+}
+
+.ai-offline-how code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  padding: 1px 5px;
+  border-radius: var(--r-xs);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  /* Long env-var lines would otherwise push the panel wider than the column. */
+  overflow-wrap: anywhere;
+}
+
+/* "live" chip in the panel header. The dot pulses rather than blinks: a blink
+   reads as a warning light, a slow pulse reads as a heartbeat. */
+.ai-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 3px var(--sp-2) 3px var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--success-soft);
+  border: 1px solid color-mix(in oklch, var(--success) 26%, transparent);
+  color: var(--success);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.ai-dot-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0 currentColor;
+  animation: ai-pulse 2.4s var(--ease-in-out) infinite;
+}
+
+@keyframes ai-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklch, currentColor 55%, transparent); }
+  70%  { box-shadow: 0 0 0 6px color-mix(in oklch, currentColor 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklch, currentColor 0%, transparent); }
+}
+
+/* The answer. min-height is deliberate: without it the panel grows from nothing
+   as the first tokens land, and the page jumps under the reader's eyes. */
+.ai-output {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.ai-output-text {
+  /* The model returns plain text with real newlines — rendered as text, never
+     as markup, so nothing it writes can become HTML. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-14);
+  line-height: var(--lh-relaxed);
+  color: var(--text-secondary);
+  max-width: 72ch;
+}
+
+/* A revert-able AI rewrite sitting beside its deterministic original. */
+.ai-diff {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.ai-diff-label {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .ai-offline {
+    gap: var(--sp-3);
+  }
+
+  .ai-output {
+    min-height: 160px;
+  }
+}
+

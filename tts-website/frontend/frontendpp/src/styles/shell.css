@@ -1,0 +1,757 @@
+/* ============================================================================
+   shell.css — the app frame: ambient background, sidebar, top bar, command
+   palette, modal sheet, footer, toasts.
+   ============================================================================ */
+
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  isolation: isolate;
+}
+
+/* ------------------------------------------------------------- Ambient bg ---- */
+
+/* Three very low-chroma orbs plus a hairline grid. Fixed, `pointer-events:
+   none`, and never animated on load — it is atmosphere, not a feature. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--canvas);
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.orb-1 {
+  top: -18vh;
+  left: -8vw;
+  width: 46vw;
+  height: 46vw;
+  background: radial-gradient(circle at 30% 30%, oklch(72% 0.14 276 / 42%), transparent 68%);
+  animation: orb-drift-a 34s var(--ease-in-out) infinite alternate;
+}
+
+.orb-2 {
+  top: 26vh;
+  right: -14vw;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle at 60% 40%, oklch(76% 0.12 300 / 36%), transparent 68%);
+  animation: orb-drift-b 42s var(--ease-in-out) infinite alternate;
+}
+
+.orb-3 {
+  bottom: -22vh;
+  left: 24vw;
+  width: 44vw;
+  height: 44vw;
+  background: radial-gradient(circle at 40% 60%, oklch(78% 0.1 235 / 30%), transparent 70%);
+  animation: orb-drift-a 50s var(--ease-in-out) infinite alternate-reverse;
+}
+
+:root[data-theme='dark'] .orb {
+  opacity: 0.42;
+  filter: blur(110px);
+}
+
+@keyframes orb-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(4vw, 3vh, 0) scale(1.08); }
+}
+
+@keyframes orb-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05); }
+  to { transform: translate3d(-5vw, -2vh, 0) scale(1); }
+}
+
+/* A 1px grid at 4% opacity: invisible on its own, but it stops large empty
+   areas from looking like unpainted canvas. */
+.grid-veil {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
+  opacity: 0.55;
+}
+
+/* --------------------------------------------------------------- Sidebar ---- */
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--sidebar-w);
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-4) var(--sp-3) var(--sp-3);
+  background: var(--surface-translucent);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border-right: 1px solid var(--border-subtle);
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scrim);
+  background: var(--scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base);
+}
+
+.sidebar-scrim.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2) var(--sp-4);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--text);
+  border-radius: var(--r-control);
+}
+
+.brand:hover {
+  color: var(--text);
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--r-control);
+  background: var(--accent-gradient);
+  color: var(--text-on-accent);
+  box-shadow: var(--accent-glow);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.brand-text strong {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+}
+
+.brand-text small {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.sidebar-close {
+  display: none;
+}
+
+.sidebar-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding-right: 2px;
+  /* Fade the top and bottom edges so scrolled content doesn't collide with the
+     brand and footer. */
+  mask-image: linear-gradient(to bottom, transparent, black 10px, black calc(100% - 14px), transparent);
+}
+
+.side-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.side-group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: 0 0 var(--sp-1) var(--sp-3);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.side-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 34px;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-control);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+  transition: background-color var(--t-fast), color var(--t-fast);
+}
+
+.side-link:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.side-link.active {
+  background: var(--tool-soft);
+  color: var(--tool-fg);
+  font-weight: var(--fw-semibold);
+}
+
+/* A 3px marker on the active row reads faster than a fill alone, and survives
+   forced-colours mode where backgrounds are dropped. */
+.side-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  translate: -6px -50%;
+  border-radius: var(--r-pill);
+  background: currentcolor;
+}
+
+.side-link svg {
+  flex: none;
+  opacity: 0.85;
+}
+
+/* The icon is where each tool's own hue shows up in the rail; `--tool-fg`
+   resolves from the `data-accent` attribute on the row itself, and the "All
+   tools" row — which has no accent — falls back to the brand. */
+.side-link-icon {
+  color: var(--tool-fg);
+}
+
+.side-link.active svg {
+  opacity: 1;
+}
+
+.side-link-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-link-home {
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--sp-1);
+}
+
+.side-count {
+  margin-left: auto;
+  padding: 1px var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.sidebar-foot {
+  padding: var(--sp-3) var(--sp-3) var(--sp-1);
+  margin-top: var(--sp-2);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--fs-11);
+  line-height: var(--lh-normal);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------- Main + topbar ---- */
+
+.shell-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: var(--topbar-h);
+  padding: 0 var(--gutter);
+  background: var(--surface-translucent);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.topbar-menu,
+.topbar-brand {
+  display: none;
+}
+
+.topbar-brand {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+  color: var(--text);
+}
+
+.palette-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: min(320px, 100%);
+  min-height: var(--ctl-md);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--fs-13);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background-color var(--t-fast),
+    color var(--t-fast);
+}
+
+.palette-trigger:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.palette-trigger > span {
+  flex: 1;
+  text-align: left;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-left: auto;
+}
+
+.shell-content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem) var(--gutter) var(--sp-16);
+}
+
+.shell-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-1) var(--sp-6);
+  padding: var(--sp-5) var(--gutter);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.footer-note {
+  color: var(--text-muted);
+}
+
+/* -------------------------------------------------------- Command palette ---- */
+
+.palette-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  justify-content: center;
+  padding: 11vh var(--sp-4) var(--sp-4);
+  background: var(--scrim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.palette {
+  width: min(580px, 100%);
+  align-self: flex-start;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface-overlay);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+
+.palette-input {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  flex: none;
+}
+
+.palette-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-size: var(--fs-16);
+  outline: none;
+}
+
+.palette-results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--sp-2);
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-control);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-instant) var(--ease-out),
+    color var(--dur-instant) var(--ease-out);
+}
+
+/* Only the keyboard cursor gets the highlight — a separate `:hover` style would
+   mean two rows look selected at once. `onMouseEnter` moves the cursor instead. */
+.palette-item.active {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.palette-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: var(--tool-soft);
+  border: 1px solid var(--tool-border);
+  color: var(--tool-fg);
+}
+
+.palette-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.palette-text strong {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+}
+
+.palette-text small {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-enter {
+  flex: none;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+
+.palette-item.active .palette-enter {
+  opacity: 1;
+}
+
+.palette-empty {
+  padding: var(--sp-8) var(--sp-4);
+  text-align: center;
+  font-size: var(--fs-13);
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------ Modal sheet ---- */
+
+/* The scrim is a sibling of the sheet, not its parent: as a parent its
+   backdrop-filter created a containing block for the sheet, and a click on the
+   sheet had to be stopPropagation'd out of the scrim's dismiss handler. */
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+}
+
+.modal-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  max-height: calc(100dvh - var(--sp-8));
+  overflow-y: auto;
+  padding: var(--sp-6);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-xl);
+  text-align: center;
+}
+
+.modal-sm {
+  width: min(360px, 100%);
+}
+
+.modal-lg {
+  width: min(560px, 100%);
+  text-align: left;
+}
+
+.modal-sheet h2 {
+  font-size: var(--fs-20);
+  margin-bottom: var(--sp-2);
+}
+
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
+
+.modal-lead {
+  font-size: var(--fs-13);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  margin-bottom: var(--sp-5);
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+}
+
+/* The QR code needs a white quiet zone to scan reliably, so this stays white in
+   both themes — it is a functional colour, not a decorative one. */
+.qr-block {
+  display: grid;
+  place-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  border-radius: var(--r-md);
+  background: #fff;
+  border: 1px solid var(--border);
+}
+
+.qr-block img {
+  width: 168px;
+  height: 168px;
+  object-fit: contain;
+}
+
+.qr-caption {
+  font-size: var(--fs-11);
+  color: var(--n-600);
+}
+
+.upi-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--ctl-lg);
+  padding: 0 var(--sp-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-control);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background-color var(--t-fast);
+}
+
+.upi-row:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.upi-label {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.upi-value {
+  flex: 1;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--fs-14);
+}
+
+/* ---------------------------------------------------------------- Toasts ---- */
+
+.vf-toast {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* ------------------------------------------------------------ Responsive ---- */
+
+/* Laptops: the rail loses width before the content does. */
+@media (max-width: 1180px) {
+  :root {
+    --sidebar-w: 240px;
+  }
+}
+
+/* Tablet and below: the rail becomes an overlay drawer. */
+@media (max-width: 900px) {
+  .sidebar {
+    width: min(300px, 84vw);
+    transform: translateX(-101%);
+    box-shadow: var(--shadow-xl);
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close {
+    display: inline-flex;
+  }
+
+  .shell-main {
+    margin-left: 0;
+  }
+
+  .topbar-menu {
+    display: inline-flex;
+  }
+
+  /* Flex rather than block so the link fills the bar's height: as a plain block
+     it was a 23px target, just under the 24px minimum, on the one layout where
+     it is tapped rather than clicked. */
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    min-height: var(--ctl-md);
+  }
+
+  /* The full search box becomes an icon-sized trigger — the label and shortcut
+     hint are meaningless without a keyboard. */
+  .palette-trigger {
+    width: auto;
+    margin-left: auto;
+    padding: 0;
+    justify-content: center;
+    width: var(--ctl-md);
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .palette-trigger > span,
+  .palette-trigger > kbd {
+    display: none;
+  }
+
+  .topbar-actions {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    gap: var(--sp-2);
+  }
+
+  /* "Support" loses its label and keeps the heart. */
+  .support-btn {
+    width: var(--ctl-md);
+    padding: 0;
+  }
+
+  .support-btn > span {
+    display: none;
+  }
+
+  .palette-scrim {
+    padding-top: 6vh;
+  }
+
+  .palette {
+    max-height: 80vh;
+  }
+
+  .shell-footer {
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+
+  .grid-veil {
+    background-size: 40px 40px;
+  }
+}
+
+/* Large displays: widen the reading measure rather than stretching the gutters. */
+@media (min-width: 1600px) {
+  :root {
+    --content-max: 1380px;
+    --sidebar-w: 280px;
+  }
+}
+

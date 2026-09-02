@@ -1,0 +1,20 @@
+/* ============================================================================
+   index.css — the only stylesheet the app imports.
+
+   Order is the cascade contract:
+     fonts      → @font-face declarations
+     tokens     → custom properties (no selectors that paint)
+     base       → element defaults, focus, reduced motion, utilities
+     components → the shared vocabulary (panels, buttons, inputs, results)
+     shell      → app frame (sidebar, top bar, palette, modal)
+     home       → dashboard
+     tools      → tool page frame
+   ============================================================================ */
+
+@import './fonts.css';
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
+@import './shell.css';
+@import './home.css';
+@import './tools.css';

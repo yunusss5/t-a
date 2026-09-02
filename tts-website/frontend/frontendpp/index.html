@@ -2,12 +2,89 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontendpp</title>
+    <meta name="theme-color" content="#f7f7fa" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- The build step replaces this with a hash-based Content-Security-Policy
+         covering the inline script below, so the deployed site needs no
+         script-src 'unsafe-inline'. It has to sit above every script it
+         governs, which is why the marker is here and not in the seo region. -->
+    <!-- csp:start --><!-- csp:end -->
+
+    <!-- Painted before the first frame: reading the stored theme in JS after
+         hydration means one white flash on every load in dark mode. Inline and
+         synchronous is the point — an external script would defeat it. The
+         theme-color meta is declared above so this can update it in place. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('vf.theme');
+          var theme = stored ? JSON.parse(stored) : null;
+          if (theme !== 'dark' && theme !== 'light') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.dataset.theme = theme;
+          document
+            .querySelector('meta[name="theme-color"]')
+            .setAttribute('content', theme === 'dark' ? '#0d0c12' : '#f7f7fa');
+        } catch (error) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+
+    <!-- Everything between these markers is regenerated per route at build time
+         by vite/plugins/seo-prerender.js, so /tools/<id> ships its own title,
+         description, canonical and JSON-LD in the HTML a crawler receives. The
+         values below are the dashboard's, and are what dev mode serves. -->
+    <!-- seo:start -->
+    <title>VoiceForge — 23 free creator tools for SEO, voice and video</title>
+    <meta
+      name="description"
+      content="A free toolkit for creators: turn a transcript or YouTube link into SEO titles, descriptions, hashtags and keywords, then narrate, subtitle and resize what you publish."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://voiceforge-toolkit.vercel.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="VoiceForge — Creator Toolkit" />
+    <meta property="og:title" content="VoiceForge — 23 free creator tools for SEO, voice and video" />
+    <meta
+      property="og:description"
+      content="Turn a transcript or YouTube link into SEO titles, descriptions, hashtags and keywords — then narrate, subtitle and resize what you publish."
+    />
+    <meta property="og:url" content="https://voiceforge-toolkit.vercel.app/" />
+    <meta property="og:image" content="https://voiceforge-toolkit.vercel.app/og-cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- seo:end -->
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- The prerender step swaps this for the route's own crawlable summary.
+         Styles stay inline: a visitor with JS disabled in dev never receives
+         the injected stylesheet, so a class would render unstyled. -->
+    <!-- noscript:start -->
+    <noscript>
+      <div style="max-width: 40rem; margin: 4rem auto; padding: 0 1.25rem; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1>VoiceForge — Creator Toolkit</h1>
+        <p>
+          VoiceForge is a free set of browser tools for creators: SEO titles and descriptions from a
+          transcript or YouTube link, text to speech, subtitle conversion, audio trimming, image
+          resizing and more.
+        </p>
+        <p>The tools run in JavaScript, so please enable it to use them.</p>
+      </div>
+    </noscript>
+    <!-- noscript:end -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

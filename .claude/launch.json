@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "tts-website/frontend/frontendpp"],
+      "port": 5173
+    },
+    {
+      "name": "frontend-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--prefix", "tts-website/frontend/frontendpp"],
+      "port": 4173
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "C:\\Users\\mdyun\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "main:app",
+        "--app-dir",
+        "tts-website/backend",
+        "--port",
+        "8000"
+      ],
+      "port": 8000
+    }
+  ]
+}
