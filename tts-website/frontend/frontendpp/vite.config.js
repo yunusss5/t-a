@@ -56,6 +56,7 @@ export default defineConfig({
       '/api': { target: 'https://tts-backend-33xv.onrender.com', changeOrigin: true },
       '/voices': { target: 'https://tts-backend-33xv.onrender.com', changeOrigin: true },
       '/speak': { target: 'https://tts-backend-33xv.onrender.com', changeOrigin: true },
+      '/generate': { target: 'https://tts-backend-33xv.onrender.com', changeOrigin: true },
     },
   },
 
