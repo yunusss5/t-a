@@ -9,6 +9,7 @@
      shell      → app frame (sidebar, top bar, palette, modal)
      home       → dashboard
      tools      → tool page frame
+     audiofy    → Audiofy suite (grid, waveform, recorder, lists)
    ============================================================================ */
 
 @import './fonts.css';
@@ -18,3 +19,4 @@
 @import './shell.css';
 @import './home.css';
 @import './tools.css';
+@import './audiofy.css';

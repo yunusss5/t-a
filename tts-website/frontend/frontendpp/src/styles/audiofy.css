@@ -1,0 +1,410 @@
+/* ============================================================================
+   audiofy.css — the Audiofy suite's own layer, on top of the shared vocabulary.
+
+   The suite reuses panels, buttons, fields, stats and dropzones from
+   components.css; everything here is suite-specific geometry: the tool grid,
+   the waveform canvas, selection transport and list rows. Colours come from the
+   tool tokens (data-accent), so the five category hues need no CSS here.
+   ============================================================================ */
+
+/* ------------------------------------------------------------- Suite hub ---- */
+
+.audiofy-suite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.audiofy-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+/* Category chips re-grade with the tool accent like everything else. */
+.audiofy-cat {
+  min-height: var(--ctl-sm);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast);
+}
+
+.audiofy-cat:hover {
+  border-color: var(--tool-border);
+  color: var(--text);
+}
+
+.audiofy-cat.active {
+  background: var(--tool-soft);
+  border-color: var(--tool-border);
+  color: var(--tool-fg);
+}
+
+.audiofy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+  gap: var(--sp-3);
+}
+
+.audiofy-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  text-align: left;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+.audiofy-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--tool-border);
+  box-shadow: var(--shadow-md);
+}
+
+.audiofy-card:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.audiofy-card-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--tool-soft);
+  border: 1px solid var(--tool-border);
+  color: var(--tool-fg);
+}
+
+.audiofy-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.audiofy-card-body strong {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-heading);
+}
+
+.audiofy-card-body small {
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.audiofy-card-cat {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ------------------------------------------------------------ Tool frame ---- */
+
+.audiofy-tool-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.audiofy-tool-head .tool-head-main h2 {
+  font-size: var(--fs-20);
+  letter-spacing: var(--ls-display);
+}
+
+.audiofy-tool-head .tool-head-main p {
+  margin-top: 2px;
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  max-width: 70ch;
+}
+
+.audiofy-privacy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--ctl-sm);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--tool-border);
+  border-radius: var(--r-pill);
+  background: var(--tool-soft);
+  color: var(--tool-fg);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+/* Small dot before the privacy label, colour-only decoration so it stays out
+   of the accessible name. */
+.audiofy-privacy::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--tool-fg);
+}
+
+/* -------------------------------------------------------------- Waveform ---- */
+
+.audiofy-wave {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  background: var(--surface-inset);
+  overflow: hidden;
+}
+
+.audiofy-wave-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.audiofy-wave-select {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Numeric start/end/length row under a selection waveform. */
+.audiofy-times {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-3);
+}
+
+@media (max-width: 560px) {
+  .audiofy-times {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ------------------------------------------------------------ Transport ---- */
+
+.audiofy-transport {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* Recorder + tapper: one big round button, centred. */
+.audiofy-rec-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) 0;
+  text-align: center;
+}
+
+.audiofy-rec-btn {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--tool-border);
+  background: var(--tool-grad);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--tool-glow);
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+.audiofy-rec-btn:hover {
+  transform: scale(1.04);
+}
+
+.audiofy-rec-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.audiofy-rec-btn.recording {
+  background: var(--danger);
+  border-color: transparent;
+  animation: audiofy-pulse 1.4s ease-in-out infinite;
+}
+
+.audiofy-rec-btn.tap {
+  background: var(--tool-soft);
+  border-color: var(--tool-border);
+  color: var(--tool-fg);
+}
+
+@keyframes audiofy-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(55% 0.19 16 / 45%); }
+  50% { box-shadow: 0 0 0 12px oklch(55% 0.19 16 / 0%); }
+}
+
+.audiofy-rec-timer {
+  font-family: var(--font-mono);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-body);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audiofy-rec-btn.recording {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------- Lists ---- */
+
+.audiofy-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.audiofy-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
+.audiofy-list-order {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-pill);
+  background: var(--tool-soft);
+  color: var(--tool-fg);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+}
+
+.audiofy-list-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.audiofy-list-main strong {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audiofy-list-main small {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.audiofy-list-main audio {
+  width: min(100%, 360px);
+  height: 34px;
+}
+
+.audiofy-list-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex: none;
+}
+
+/* ------------------------------------------------- Key detector chroma ---- */
+
+.audiofy-chroma {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-1);
+  height: 96px;
+  padding: var(--sp-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  background: var(--surface-inset);
+}
+
+.audiofy-chroma-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+  flex: 1;
+  height: 100%;
+}
+
+.audiofy-chroma-bar {
+  width: 100%;
+  min-height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--tool-grad);
+}
+
+.audiofy-chroma-col small {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------- Media + helpers ---- */
+
+.audiofy-image-frame {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  background: var(--surface-inset);
+  padding: var(--sp-2);
+  overflow: hidden;
+}
+
+.audiofy-offscreen {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.audiofy-video {
+  width: 100%;
+  border-radius: var(--r-sm);
+  background: var(--surface-inset);
+}
+
+/* Label/value rows the tools share ("file meta + change file", intro lines). */
+.between-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}

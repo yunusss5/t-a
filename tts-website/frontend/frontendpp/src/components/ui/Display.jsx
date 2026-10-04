@@ -134,14 +134,21 @@ export function CheckList({ checks }) {
   );
 }
 
-/** Drag-and-drop file picker. */
-export function Dropzone({ file, onFile, accept, hint, icon, label = 'Choose a file' }) {
+/**
+ * Drag-and-drop file picker.
+ *
+ * `multiple` widens the contract from one file to many: with it set, a
+ * multi-file drop or picker selection calls `onFiles` with the whole list
+ * (falling back to `onFile` for a single pick), so callers opt in per tool.
+ */
+export function Dropzone({ file, onFile, onFiles, multiple = false, accept, hint, icon, label = 'Choose a file' }) {
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const hintId = useId();
 
-  const pick = (candidate) => {
-    if (candidate) onFile(candidate);
+  const pick = (candidate, list) => {
+    if (multiple && list?.length) onFiles?.(list);
+    else if (candidate) onFile?.(candidate);
   };
 
   return (
@@ -157,7 +164,7 @@ export function Dropzone({ file, onFile, accept, hint, icon, label = 'Choose a f
         onDrop={(event) => {
           event.preventDefault();
           setDragging(false);
-          pick(event.dataTransfer.files?.[0]);
+          pick(event.dataTransfer.files?.[0], event.dataTransfer.files);
         }}
         role="button"
         tabIndex={0}
@@ -188,10 +195,14 @@ export function Dropzone({ file, onFile, accept, hint, icon, label = 'Choose a f
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         hidden
         tabIndex={-1}
         aria-hidden="true"
-        onChange={(event) => pick(event.target.files?.[0])}
+        onChange={(event) => {
+          pick(event.target.files?.[0], event.target.files);
+          event.target.value = '';
+        }}
       />
     </>
   );

@@ -114,6 +114,21 @@ export const CATALOGUE = [
     keywords: ['audio', 'speed', 'length', 'time stretch', 'pitch', 'tempo', 'wav'],
   },
   {
+    id: 'audiofy-suite',
+    name: 'Audiofy Suite',
+    tagline: '50 studio audio tools — trim, convert, effects, analysis, all in-browser',
+    description:
+      'Trim, merge and split audio, add reverb, echo, bass and 8D effects, detect BPM and key, convert and export WAV. 50 private tools that run in your browser.',
+    category: 'audio',
+    accent: 'violet',
+    badge: '50 tools',
+    keywords: [
+      'audio', 'trim', 'trimmer', 'merge', 'split', 'convert', 'mp3', 'wav', 'bass', 'reverb',
+      'echo', 'equalizer', '8d', 'karaoke', 'vocal remover', 'bpm', 'key', 'ringtone',
+      'recorder', 'tone', 'waveform', 'loudness', 'pitch', 'tempo', 'spectrum',
+    ],
+  },
+  {
     id: 'subtitle-studio',
     name: 'Subtitle Studio',
     tagline: 'Convert SRT / VTT / TXT / CSV and fix out-of-sync timings',

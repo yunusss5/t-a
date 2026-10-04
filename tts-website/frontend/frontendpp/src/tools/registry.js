@@ -10,7 +10,7 @@
 import { lazy } from 'react';
 import {
   AudioLines, Baseline, Binary, Braces, CalendarClock, CaseSensitive, Clock,
-  Eraser, FileType2, Image, KeyRound, Mic, Notebook, Palette, PenLine, QrCode,
+  Eraser, FileType2, Image, KeyRound, Mic, Music4, Notebook, Palette, PenLine, QrCode,
   Ruler, ScanSearch, Sparkles, Type, Volume2, Wand2, SquarePlay,
 } from 'lucide-react';
 import { CATALOGUE, CATEGORIES } from './catalogue';
@@ -30,6 +30,7 @@ const IMPLEMENTATIONS = {
   'text-to-speech': { icon: Volume2, component: lazy(() => import('./TextToSpeech')) },
   'speech-to-text': { icon: Mic, component: lazy(() => import('./SpeechToText')) },
   'audio-studio': { icon: AudioLines, component: lazy(() => import('./AudioStudio')) },
+  'audiofy-suite': { icon: Music4, component: lazy(() => import('./audiofy/AudiofySuite')) },
   'subtitle-studio': { icon: FileType2, component: lazy(() => import('./SubtitleStudio')) },
   'word-counter': { icon: Baseline, component: lazy(() => import('./WordCounter')) },
   'case-converter': { icon: CaseSensitive, component: lazy(() => import('./CaseConverter')) },

@@ -5,11 +5,18 @@
 // own.
 // ---------------------------------------------------------------------------
 
-/** Encode an AudioBuffer as a 16-bit PCM WAV. */
-export function bufferToWav(buffer) {
+/**
+ * Encode an AudioBuffer as a PCM WAV.
+ *
+ * `bitDepth` 16 (default) or 24; anything else falls back to 16 because the
+ * point of the parameter is "how big is this file going to be", and 24-bit is
+ * the only other depth every player handles. Data stays in the format chunk as
+ * PCM (1) either way — WAVE_FORMAT_EXTENSIBLE is not worth the compat risk.
+ */
+export function bufferToWav(buffer, bitDepth = 16) {
+  const bytesPerSample = bitDepth === 24 ? 3 : 2;
   const channels = buffer.numberOfChannels;
   const { sampleRate, length } = buffer;
-  const bytesPerSample = 2;
   const dataSize = length * channels * bytesPerSample;
   const view = new DataView(new ArrayBuffer(44 + dataSize));
 
@@ -39,9 +46,18 @@ export function bufferToWav(buffer) {
   for (let i = 0; i < length; i += 1) {
     for (let ch = 0; ch < channels; ch += 1) {
       const sample = Math.max(-1, Math.min(1, data[ch][i]));
-      // Asymmetric ranges: -1 maps to -32768, +1 to 32767.
-      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
-      offset += 2;
+
+      if (bytesPerSample === 3) {
+        // 24-bit little-endian, written byte by byte (no setInt24).
+        const int = Math.round(sample < 0 ? sample * 0x800000 : sample * 0x7fffff);
+        view.setUint8(offset, int & 0xff);
+        view.setUint8(offset + 1, (int >> 8) & 0xff);
+        view.setUint8(offset + 2, (int >> 16) & 0xff);
+      } else {
+        // Asymmetric ranges: -1 maps to -32768, +1 to 32767.
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+      }
+      offset += bytesPerSample;
     }
   }
 
