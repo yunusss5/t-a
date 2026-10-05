@@ -102,6 +102,16 @@ export const CATALOGUE = [
     badge: 'Popular',
     server: true,
     keywords: ['tts', 'voice', 'speech', 'mp3', 'narration', 'voiceover'],
+    howTo: [
+      'Type or paste a script, or upload a TXT, MD, SRT or VTT transcript.',
+      'Choose a language and voice, then adjust the speaking speed or enable Auto Speed for a target duration.',
+      'Select Generate audio, preview the result, and download the MP3.',
+    ],
+    faqs: [
+      { question: 'How do I create an MP3 voiceover?', answer: 'Enter text or upload a supported transcript, choose a language and voice, set the speed if needed, then select Generate audio. Preview and download the MP3 when it is ready.' },
+      { question: 'Which transcript formats can I upload?', answer: 'Text to Speech accepts TXT, Markdown, SRT and VTT files, as well as text entered directly in the page.' },
+      { question: 'Is speech generated entirely in my browser?', answer: 'No. This feature sends the text or transcript to the VoiceForge backend to generate speech, then streams the resulting audio back.' },
+    ],
   },
   {
     id: 'speech-to-text',
@@ -112,6 +122,16 @@ export const CATALOGUE = [
     category: 'audio',
     accent: 'rose',
     keywords: ['dictation', 'stt', 'transcribe', 'voice typing', 'microphone'],
+    howTo: [
+      'Choose the spoken language before starting dictation.',
+      'Allow microphone access, select Start dictation, and speak at a natural pace.',
+      'Select Stop dictation, review and edit the transcript, then copy it or download a TXT file.',
+    ],
+    faqs: [
+      { question: 'How do I turn speech into text?', answer: 'Choose a language, allow microphone access, start dictation, and speak. Stop when finished, then review and edit the transcript.' },
+      { question: 'Which browsers support live dictation?', answer: 'The page uses the browser Web Speech API. Chrome, Edge and Safari are supported by this app; Firefox does not currently provide the required API here.' },
+      { question: 'Can I save the transcript?', answer: 'Yes. Copy the text or download it as a TXT file from the transcript panel.' },
+    ],
   },
   {
     id: 'audio-studio',
@@ -122,6 +142,16 @@ export const CATALOGUE = [
     category: 'audio',
     accent: 'sky',
     keywords: ['audio', 'speed', 'length', 'time stretch', 'pitch', 'tempo', 'wav'],
+    howTo: [
+      'Choose an MP3, WAV, M4A or OGG file (up to 30 MB). The file is decoded in your browser.',
+      'Enter a target duration or choose a speed preset; the other value updates to match.',
+      'Apply the change, preview the processed audio, and download the WAV when it sounds right.',
+    ],
+    faqs: [
+      { question: 'How do I change an audio file to an exact length?', answer: 'Load an audio file, set the target length in seconds or choose a speed preset, then apply the change and download the rendered WAV.' },
+      { question: 'Will changing the duration also change the pitch?', answer: 'The time-stretching process aims to change duration while preserving pitch. Very large speed changes can sound processed, and the page warns when settings are outside its cleaner range.' },
+      { question: 'Are my audio files uploaded?', answer: 'No. Audio Length decodes and processes the selected file in your browser and exports a WAV locally.' },
+    ],
   },
   {
     id: 'audiofy-suite',
@@ -135,6 +165,11 @@ export const CATALOGUE = [
       'audio', 'trim', 'trimmer', 'merge', 'split', 'convert', 'mp3', 'wav', 'bass', 'reverb',
       'echo', 'equalizer', '8d', 'karaoke', 'vocal remover', 'bpm', 'key', 'ringtone',
       'recorder', 'tone', 'waveform', 'loudness', 'pitch', 'tempo', 'spectrum',
+    ],
+    howTo: [
+      'Search the suite or filter by category, then open the audio tool that fits your task.',
+      'Load or record audio when prompted, adjust the available controls, and run the tool.',
+      'Review the result and use that tool’s copy, preview or download control to keep it.',
     ],
     faqs: [
       { question: 'Do my audio files get uploaded anywhere?', answer: 'No. Every AudioKit tool decodes, processes and exports audio inside your own browser tab using the Web Audio API. Nothing is sent to a server.' },
@@ -153,6 +188,18 @@ export const CATALOGUE = [
     accent: 'emerald',
     server: true,
     keywords: ['srt', 'vtt', 'subtitle', 'caption', 'sync', 'offset', 'convert'],
+    howTo: [
+      'Upload an SRT, VTT or TXT file, or paste subtitle text into the input area.',
+      'Choose an output format. For timed captions, adjust the offset or speed scale if needed.',
+      'For plain scripts, set words per cue and words per minute, then select Convert.',
+      'Review the cue preview and copy or download the converted output.',
+    ],
+    faqs: [
+      { question: 'Which subtitle input formats are supported?', answer: 'You can upload SRT, VTT or TXT files, or paste content into the input area. The converter can produce SRT, WebVTT, plain text or CSV output.' },
+      { question: 'How do I fix captions that are early or late?', answer: 'Use the offset in seconds: a positive offset delays captions and a negative offset advances them. Use the speed scale to correct timing drift across a longer file.' },
+      { question: 'Can I create captions from a plain text script?', answer: 'Yes. Paste or upload a plain script, choose the words per cue and estimated words per minute, then convert it to generate timed cues.' },
+      { question: 'Is subtitle text sent to a server?', answer: 'Yes. Subtitle Studio sends the provided content or file to the VoiceForge backend for conversion and returns the result.' },
+    ],
   },
   {
     id: 'word-counter',

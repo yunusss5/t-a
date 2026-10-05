@@ -5,7 +5,6 @@ import { Heart, Menu, Moon, Search, Sun } from 'lucide-react';
 import Sidebar from './Sidebar';
 import CommandPalette from './CommandPalette';
 import SupportModal from './SupportModal';
-import AssistantWidget from '../ai/AssistantWidget';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import useScrollLock from '../../hooks/useScrollLock';
 
@@ -141,14 +140,18 @@ export default function AppShell({ children, favourites }) {
         <footer className="shell-footer">
           <span>VoiceForge Creator Toolkit · © {new Date().getFullYear()} Tikri AI</span>
           <span className="footer-note">
-            Files are processed in your browser or streamed straight back — nothing is kept.
+            Browser tools process files locally; server tools send input to return results.
           </span>
+          <nav className="footer-links" aria-label="Site information">
+            <Link to="/about">About</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
+          </nav>
         </footer>
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
-      <AssistantWidget />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 import AppShell from './components/shell/AppShell';
 import HomePage from './pages/HomePage';
 import ToolPage from './pages/ToolPage';
+import InfoPage from './pages/InfoPage';
 import NotFoundPage from './pages/NotFoundPage';
 import useLocalStorage from './hooks/useLocalStorage';
 
@@ -29,6 +30,9 @@ export default function App() {
           path="/tools/:toolId"
           element={<ToolPage favourites={favourites} onToggleFavourite={toggleFavourite} />}
         />
+        <Route path="/about" element={<InfoPage slug="about" />} />
+        <Route path="/privacy" element={<InfoPage slug="privacy" />} />
+        <Route path="/terms" element={<InfoPage slug="terms" />} />
         {/* An unknown URL renders a real 404 rather than redirecting to `/`:
             a redirect tells a crawler the bad URL is a live page. */}
         <Route path="*" element={<NotFoundPage />} />

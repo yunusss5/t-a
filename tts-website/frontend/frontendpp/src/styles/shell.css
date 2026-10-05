@@ -384,6 +384,17 @@
   color: var(--text-muted);
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+
+.footer-links a:hover,
+.info-page-links a:hover {
+  color: var(--text);
+}
+
 /* -------------------------------------------------------- Command palette ---- */
 
 .palette-scrim {
@@ -754,4 +765,3 @@
     --sidebar-w: 280px;
   }
 }
-

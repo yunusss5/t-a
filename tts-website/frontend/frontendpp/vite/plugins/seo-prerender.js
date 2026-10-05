@@ -21,6 +21,7 @@ import path from 'node:path';
 
 import { ACTIVE_CATALOGUE } from '../../src/tools/catalogue.js';
 import { SITE, absoluteUrl, homeSeo, notFoundSeo, toolSeo } from '../../src/lib/seo.js';
+import { SITE_PAGES, sitePagePath, sitePageSeo } from '../../src/lib/sitePages.js';
 
 const SEO_REGION = /<!-- seo:start -->[\s\S]*?<!-- seo:end -->/;
 const NOSCRIPT_REGION = /<!-- noscript:start -->[\s\S]*?<!-- noscript:end -->/;
@@ -303,6 +304,32 @@ export default function seoPrerender() {
         written.push(`tools/${tool.id}/index.html`);
       }
 
+      for (const page of SITE_PAGES) {
+        const dir = path.join(outDir, page.slug);
+        await mkdir(dir, { recursive: true });
+        await writeFile(
+          path.join(dir, 'index.html'),
+          renderRoute(
+            template,
+            sitePageSeo(page),
+            {
+              heading: page.heading,
+              body: page.intro,
+              links: [
+                { href: '/', label: 'All VoiceForge tools' },
+                ...SITE_PAGES.filter((item) => item.slug !== page.slug).map((item) => ({
+                  href: sitePagePath(item),
+                  label: item.title,
+                })),
+              ],
+            },
+            origins,
+          ),
+          'utf8',
+        );
+        written.push(`${page.slug}/index.html`);
+      }
+
       // Vercel serves 404.html for unmatched paths only when there is no
       // catch-all rewrite; this is here so any other host (and `vite preview`)
       // has a real, noindexed 404 body to serve.
@@ -327,6 +354,7 @@ export default function seoPrerender() {
         sitemap([
           { path: '/', priority: '1.0' },
           ...ACTIVE_CATALOGUE.map((tool) => ({ path: `/tools/${tool.id}`, priority: '0.8' })),
+          ...SITE_PAGES.map((page) => ({ path: sitePagePath(page), priority: '0.4' })),
         ]),
         'utf8',
       );

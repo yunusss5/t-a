@@ -8,12 +8,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Field, Input, Panel } from '../../components/ui/Primitives';
-import FaqSection from '../../components/ui/FaqSection';
 import { cx } from '../../lib/utils';
 import { ToolFrame } from './toolkit';
 import { AUDIOFY_CATEGORIES, AUDIOFY_TOOLS, findAudiofyTool } from './registry';
 
-export default function AudiofySuite({ tool }) {
+export default function AudiofySuite() {
   const [activeId, setActiveId] = useState(() => window.location.hash.slice(1));
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
@@ -145,7 +144,6 @@ export default function AudiofySuite({ tool }) {
         </Alert>
       )}
 
-      <FaqSection faqs={tool?.faqs} />
     </div>
   );
 }

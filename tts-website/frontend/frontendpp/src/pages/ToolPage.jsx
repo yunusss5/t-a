@@ -7,6 +7,8 @@ import { getTool, relatedTools } from '../tools/registry';
 import { toolSeo } from '../lib/seo';
 import useSeo from '../hooks/useSeo';
 import { cx } from '../lib/utils';
+import HowToSection from '../components/ui/HowToSection';
+import FaqSection from '../components/ui/FaqSection';
 import NotFoundPage from './NotFoundPage';
 
 /** Resolves :toolId from the route, renders the lazy tool inside a shared header. */
@@ -85,6 +87,9 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
             catalogue data from it without each one re-resolving its own id. */}
         <Component tool={tool} />
       </Suspense>
+
+      <HowToSection steps={tool.howTo} title={`How to use ${tool.name}`} />
+      <FaqSection faqs={tool.faqs} />
 
       {related.length > 0 && (
         <section className="related" aria-labelledby="related-title">

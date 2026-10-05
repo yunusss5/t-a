@@ -68,6 +68,15 @@ describe('catalogue integrity', () => {
       expect(tool.keywords.length).toBeGreaterThanOrEqual(3);
     });
   });
+
+  it('provides visible how-to steps and FAQs for every active tool page', () => {
+    ACTIVE_CATALOGUE.forEach((tool) => {
+      expect(tool.howTo?.length, `${tool.id} how-to steps`).toBeGreaterThanOrEqual(2);
+      expect(tool.faqs?.length, `${tool.id} FAQs`).toBeGreaterThanOrEqual(2);
+      const faqSchema = toolSeo(tool).jsonLd.find((item) => item['@type'] === 'FAQPage');
+      expect(faqSchema?.mainEntity).toHaveLength(tool.faqs.length);
+    });
+  });
 });
 
 describe('per-tool SEO records', () => {
