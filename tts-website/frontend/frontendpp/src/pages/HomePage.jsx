@@ -44,7 +44,7 @@ export default function HomePage({ favourites, onToggleFavourite }) {
         </p>
 
         <div className="hero-actions">
-          <Link to={`/tools/${flagship.id}`} className="ui-btn ui-btn-primary hero-cta">
+          <Link to={flagship.href || `/tools/${flagship.id}`} className="ui-btn ui-btn-primary hero-cta">
             <Sparkles size={16} aria-hidden="true" />
             Open SEO Content Studio
             <ArrowRight size={16} aria-hidden="true" />
@@ -142,7 +142,7 @@ function ToolCard({ tool, index, favourite, onToggleFavourite }) {
               indexes — but its ::after stretches over the whole card, so the
               click target is the card and the star stays a real sibling button
               instead of being nested inside an <a>. */}
-          <Link to={`/tools/${tool.id}`} className="tool-card-link">
+          <Link to={tool.href || `/tools/${tool.id}`} className="tool-card-link">
             {tool.name}
           </Link>
           {tool.badge && <span className="tool-badge">{tool.badge}</span>}

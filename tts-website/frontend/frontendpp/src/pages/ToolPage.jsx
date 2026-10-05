@@ -81,7 +81,9 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
           </div>
         }
       >
-        <Component />
+        {/* The tool record rides along: suite pages read their `faqs` and other
+            catalogue data from it without each one re-resolving its own id. */}
+        <Component tool={tool} />
       </Suspense>
 
       {related.length > 0 && (
@@ -94,7 +96,7 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
               return (
                 <li key={item.id}>
                   <Link
-                    to={`/tools/${item.id}`}
+                    to={item.href || `/tools/${item.id}`}
                     className="related-card"
                     data-accent={item.accent}
                   >

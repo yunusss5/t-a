@@ -1,5 +1,5 @@
 // src/tools/audiofy/AudiofySuite.jsx
-// The Audiofy suite: 50 browser-only audio tools inside one tool page.
+// The Audiofy suite: browser-only audio tools inside one tool page.
 //
 // Navigation is state + location.hash rather than new routes: the suite is a
 // single catalogue entry, so deep links read /tools/audiofy-suite#trimmer and
@@ -8,11 +8,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Field, Input, Panel } from '../../components/ui/Primitives';
+import FaqSection from '../../components/ui/FaqSection';
 import { cx } from '../../lib/utils';
 import { ToolFrame } from './toolkit';
 import { AUDIOFY_CATEGORIES, AUDIOFY_TOOLS, findAudiofyTool } from './registry';
 
-export default function AudiofySuite() {
+export default function AudiofySuite({ tool }) {
   const [activeId, setActiveId] = useState(() => window.location.hash.slice(1));
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
@@ -68,7 +69,7 @@ export default function AudiofySuite() {
     <div className="audiofy-suite">
       <Panel
         title="About this suite"
-        hint="50 studio tools for trimming, converting, effects and analysis — decoded, processed and exported entirely in this tab."
+        hint={`${AUDIOFY_TOOLS.length} studio tools for trimming, converting, effects and analysis — decoded, processed and exported entirely in this tab.`}
       >
         <div className="between-row">
           <p className="muted-line">
@@ -78,7 +79,7 @@ export default function AudiofySuite() {
         </div>
       </Panel>
 
-      <Panel title="Choose a tool">
+      <Panel title={`Choose a tool (${visible.length})`}>
         <Field label="Search the suite" htmlFor="audiofy-search">
           <Input
             id="audiofy-search"
@@ -143,6 +144,8 @@ export default function AudiofySuite() {
           Try a shorter search, or clear the category filter.
         </Alert>
       )}
+
+      <FaqSection faqs={tool?.faqs} />
     </div>
   );
 }

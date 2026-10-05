@@ -1,6 +1,6 @@
 // src/components/shell/Sidebar.jsx
 import { useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutGrid, Star, X } from 'lucide-react';
 import { CATEGORIES, TOOLS, getTool } from '../../tools/registry';
 import { cx } from '../../lib/utils';
@@ -19,21 +19,14 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
   const panelRef = useRef(null);
   const closeRef = useRef(null);
 
-  // A translated-off drawer is still in the tab order, so a keyboard user
-  // tabbing the page walks 20-odd invisible links. `inert` removes the whole
-  // subtree from focus and the a11y tree — but only while it *is* a drawer,
-  // since on desktop the same element is the permanent, always-usable rail.
   const isDrawer = useMediaQuery(DRAWER_QUERY);
-
-  // Open on a phone it is a modal overlay; on a desktop the identical element is
-  // page furniture. Only the first is a dialog, and only the first is trapped.
   const isModal = isDrawer && open;
 
   useFocusTrap(panelRef, isModal);
 
   // Focus has to move into the drawer, or Tab keeps walking the page behind the
   // scrim — invisible to the person doing it. The close button is the first stop
-  // rather than the first of 23 links, so the way out is what gets announced;
+  // rather than the first of 40 links, so the way out is what gets announced;
   // preventScroll keeps the browser from scrolling the panel mid-slide, and
   // useFocusTrap hands focus back to the menu button on close.
   useEffect(() => {
@@ -98,6 +91,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
           >
             <LayoutGrid size={17} />
             All tools
+            {/* Derived, never hardcoded: the badge always matches the catalogue. */}
             <span className="side-count">{TOOLS.length}</span>
           </NavLink>
 
@@ -118,7 +112,10 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
 
             return (
               <div className="side-group" key={category.id}>
-                <p className="side-group-label">{category.label}</p>
+                <p className="side-group-label">
+                  {category.label}
+                  <span className="side-group-count">{tools.length}</span>
+                </p>
                 {tools.map((tool) => (
                   <SideTool key={tool.id} tool={tool} onClose={onClose} />
                 ))}
@@ -137,11 +134,15 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
 
 function SideTool({ tool, onClose }) {
   const Icon = tool.icon;
+  const location = useLocation();
+  const active = tool.href
+    ? `${location.pathname}${location.hash}` === tool.href
+    : location.pathname === `/tools/${tool.id}`;
 
   return (
     <NavLink
-      to={`/tools/${tool.id}`}
-      className={({ isActive }) => cx('side-link', isActive && 'active')}
+      to={tool.href || `/tools/${tool.id}`}
+      className={() => cx('side-link', active && 'active')}
       onClick={onClose}
       title={tool.tagline}
       data-accent={tool.accent}

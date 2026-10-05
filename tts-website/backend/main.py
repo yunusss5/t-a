@@ -319,6 +319,6 @@ def root():
     return {
         "status": "ok",
         "message": "VoiceForge Creator Toolkit API. See /docs for the endpoints.",
-        "tools": ["tts", "seo", "summarize", "analyze", "subtitles", "youtube", "ai"],
+        "tools": ["tts", "seo", "summarize", "analyze", "subtitles", "youtube", "ai", "web"],
         "ai_enabled": ai_service.available(),
     }

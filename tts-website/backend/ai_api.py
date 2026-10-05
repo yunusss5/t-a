@@ -2,6 +2,7 @@
 The AI endpoints.
 
     GET  /api/ai/status          is a model connected, and which tasks exist
+    POST /api/ai/chat            a short general assistant conversation
     POST /api/ai/assist          one writing task, answered in full
     POST /api/ai/assist/stream   the same, as server-sent events
     POST /api/ai/seo-polish      rewrite a generated SEO package
@@ -71,6 +72,15 @@ async def ai_assist(
     tone: Optional[str] = Form(None),
 ):
     return await _run(service.assist(task, content, tone=tone))
+
+
+@router.post("/chat", dependencies=[Depends(rate_limit("ai"))])
+async def ai_chat(messages: str = Form(..., description="Recent user/assistant messages as JSON")):
+    try:
+        parsed = json.loads(messages)
+    except json.JSONDecodeError as error:
+        raise HTTPException(status_code=400, detail="messages must be valid JSON.") from error
+    return await _run(service.chat(parsed))
 
 
 def _sse(payload: dict) -> str:

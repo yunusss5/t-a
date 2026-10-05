@@ -2,14 +2,17 @@
 // ---------------------------------------------------------------------------
 // One place that decides what every page claims about itself.
 //
-// Plain data and pure functions, no imports: the build step that emits
-// sitemap.xml and the per-route static HTML imports this from Node, so the
+// Plain data and pure functions. Its only import is the catalogue — a plain
+// data module with an explicit .js extension — so the build step that emits
+// sitemap.xml and the per-route static HTML still loads this from Node and the
 // crawlable HTML and the client-rendered <head> can never disagree.
 //
 // Set SITE_URL (build env) or VITE_SITE_URL to the deployed origin. Canonicals
 // and Open Graph URLs must be absolute, and guessing from window.location would
 // mint a different canonical for every preview deployment.
 // ---------------------------------------------------------------------------
+
+import { CATEGORIES } from '../tools/catalogue.js';
 
 const ENV_URL =
   (typeof process !== 'undefined' && process.env && process.env.SITE_URL) ||
@@ -58,11 +61,16 @@ export function homeSeo(toolCount = 0) {
 
 /** SEO record for one tool page. */
 export function toolSeo(tool) {
+  const jsonLd = [softwareJsonLd(tool), breadcrumbJsonLd(tool)];
+  // FAQPage only when the page genuinely renders these questions and answers
+  // (FaqSection reads the same data) — schema for invisible FAQs is a violation.
+  if (tool.faqs?.length) jsonLd.push(faqJsonLd(tool.faqs));
+
   return {
     title: `${tool.name} — free online tool | ${SITE.name}`,
     description: clampDescription(tool.description || tool.tagline),
     path: toolPath(tool.id),
-    jsonLd: [softwareJsonLd(tool), breadcrumbJsonLd(tool)],
+    jsonLd,
   };
 }
 
@@ -126,17 +134,41 @@ function softwareJsonLd(tool) {
 }
 
 function breadcrumbJsonLd(tool) {
+  const items = [
+    { '@type': 'ListItem', position: 1, name: 'All tools', item: absoluteUrl('/') },
+  ];
+  const category = CATEGORIES.find((item) => item.id === tool.category);
+  if (category) {
+    items.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: category.label,
+      item: absoluteUrl('/'),
+    });
+  }
+  items.push({
+    '@type': 'ListItem',
+    position: items.length + 1,
+    name: tool.name,
+    item: absoluteUrl(toolPath(tool.id)),
+  });
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'All tools', item: absoluteUrl('/') },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: tool.name,
-        item: absoluteUrl(toolPath(tool.id)),
-      },
-    ],
+    itemListElement: items,
+  };
+}
+
+/** FAQPage schema — built from the same `faqs` the tool page renders. */
+export function faqJsonLd(faqs) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(({ question, answer }) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
   };
 }

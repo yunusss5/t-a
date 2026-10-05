@@ -82,6 +82,16 @@ export const CATALOGUE = [
     keywords: ['ai', 'writing', 'assistant', 'hook', 'title', 'outline', 'rewrite', 'script', 'llm'],
   },
   {
+    id: 'ai-assistant',
+    name: 'AI Assistant',
+    tagline: 'Ask questions and get help with your creative workflow',
+    description:
+      'Chat with the VoiceForge assistant for writing help, creator advice and guidance using the toolkit. No personal API key required.',
+    category: 'seo',
+    accent: 'sky',
+    keywords: ['assistant', 'chat', 'ask', 'help', 'ai', 'creator'],
+  },
+  {
     id: 'text-to-speech',
     name: 'Text to Speech',
     tagline: 'Neural voices in 100+ languages, exported as MP3',
@@ -115,17 +125,22 @@ export const CATALOGUE = [
   },
   {
     id: 'audiofy-suite',
-    name: 'Audiofy Suite',
-    tagline: '50 studio audio tools — trim, convert, effects, analysis, all in-browser',
+    name: 'AudioKit',
+    tagline: 'Studio audio tools — trim, convert, effects and analysis, in-browser',
     description:
-      'Trim, merge and split audio, add reverb, echo, bass and 8D effects, detect BPM and key, convert and export WAV. 50 private tools that run in your browser.',
+      'Trim, merge and split audio, add reverb, echo, bass and 8D effects, detect BPM and key, convert and export WAV. Private tools that run in your browser.',
     category: 'audio',
     accent: 'violet',
-    badge: '50 tools',
     keywords: [
       'audio', 'trim', 'trimmer', 'merge', 'split', 'convert', 'mp3', 'wav', 'bass', 'reverb',
       'echo', 'equalizer', '8d', 'karaoke', 'vocal remover', 'bpm', 'key', 'ringtone',
       'recorder', 'tone', 'waveform', 'loudness', 'pitch', 'tempo', 'spectrum',
+    ],
+    faqs: [
+      { question: 'Do my audio files get uploaded anywhere?', answer: 'No. Every AudioKit tool decodes, processes and exports audio inside your own browser tab using the Web Audio API. Nothing is sent to a server.' },
+      { question: 'What format do the tools export?', answer: 'Exports are 16-bit PCM WAV unless a tool says otherwise. WAV is lossless and plays everywhere; browsers cannot reliably encode MP3, so converters re-export decoded audio as WAV.' },
+      { question: 'How big can my files be?', answer: 'Up to 100 MB per file. The practical ceiling is your device memory, since the decoded audio lives in the tab while you work on it.' },
+      { question: 'Is there one page with the whole suite?', answer: 'Yes — AudioKit is one suite page with its own search and category filters, and every tool has its own direct link you can bookmark.' },
     ],
   },
   {

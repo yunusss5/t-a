@@ -229,9 +229,9 @@ export default function seoPrerender() {
       origins = apiOrigins(apiBase);
     },
 
-    // closeBundle, not generateBundle: the template we clone is the *written*
+    // writeBundle, not generateBundle: the template we clone is the *written*
     // index.html, after Vite has injected the hashed script and style tags.
-    async closeBundle() {
+    async writeBundle() {
       const indexPath = path.join(outDir, 'index.html');
       const template = await readFile(indexPath, 'utf8');
 

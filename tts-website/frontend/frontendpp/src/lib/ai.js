@@ -15,6 +15,10 @@
 
 import { getJson, postForm, postFormStream } from './api';
 
+/** General assistant chat; provider credentials remain on the site backend. */
+export const chatAssistant = (messages) =>
+  postForm('/api/ai/chat', { messages: JSON.stringify(messages) });
+
 /** What a caller sees when the backend has no model configured or is asleep. */
 const OFFLINE = {
   enabled: false,

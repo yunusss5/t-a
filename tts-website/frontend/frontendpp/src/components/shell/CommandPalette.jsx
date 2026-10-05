@@ -48,7 +48,7 @@ function PaletteBody({ onClose }) {
 
   const choose = (tool) => {
     if (!tool) return;
-    navigate(`/tools/${tool.id}`);
+    navigate(tool.href || `/tools/${tool.id}`);
     onClose();
   };
 

@@ -9,17 +9,18 @@
 
 import { lazy } from 'react';
 import {
-  AudioLines, Baseline, Binary, Braces, CalendarClock, CaseSensitive, Clock,
-  Eraser, FileType2, Image, KeyRound, Mic, Music4, Notebook, Palette, PenLine, QrCode,
-  Ruler, ScanSearch, Sparkles, Type, Volume2, Wand2, SquarePlay,
+  AudioLines, Baseline, Binary, Braces, CalendarClock, CaseSensitive, Clock, Eraser,
+  FileType2, Image, KeyRound, MessageCircle, Mic, Music4, Notebook, Palette, PenLine,
+  QrCode, Ruler, ScanSearch, Sparkles, Type, Volume2, Wand2, SquarePlay,
 } from 'lucide-react';
 import { CATALOGUE, CATEGORIES } from './catalogue';
+import { AUDIOFY_CATEGORIES, AUDIOFY_TOOLS } from './audiofy/registry';
 
 export { CATEGORIES };
 
 /**
  * id → { icon, component }. Every tool is lazy-loaded so the first paint only
- * ships the shell; the 23 tool chunks are fetched on navigation.
+ * ships the shell; tool chunks are fetched on navigation.
  */
 const IMPLEMENTATIONS = {
   'seo-studio': { icon: Sparkles, component: lazy(() => import('./SeoStudio')) },
@@ -27,6 +28,7 @@ const IMPLEMENTATIONS = {
   summarizer: { icon: Wand2, component: lazy(() => import('./Summarizer')) },
   'content-analyzer': { icon: ScanSearch, component: lazy(() => import('./ContentAnalyzer')) },
   'ai-studio': { icon: PenLine, component: lazy(() => import('./AiStudio')) },
+  'ai-assistant': { icon: MessageCircle, component: lazy(() => import('./AssistantTool')) },
   'text-to-speech': { icon: Volume2, component: lazy(() => import('./TextToSpeech')) },
   'speech-to-text': { icon: Mic, component: lazy(() => import('./SpeechToText')) },
   'audio-studio': { icon: AudioLines, component: lazy(() => import('./AudioStudio')) },
@@ -48,7 +50,27 @@ const IMPLEMENTATIONS = {
   notepad: { icon: Notebook, component: lazy(() => import('./Notepad')) },
 };
 
-export const TOOLS = CATALOGUE.map((tool) => ({ ...tool, ...IMPLEMENTATIONS[tool.id] }));
+const AUDIOFY_ACCENTS = Object.fromEntries(
+  AUDIOFY_CATEGORIES.map(({ id, accent }) => [id, accent]),
+);
+
+const AUDIOFY_ENTRIES = AUDIOFY_TOOLS.map((tool) => ({
+  id: tool.id,
+  name: tool.name,
+  tagline: tool.description,
+  description: tool.description,
+  category: 'audio',
+  accent: AUDIOFY_ACCENTS[tool.category],
+  keywords: [tool.name, tool.categoryLabel, tool.id.replaceAll('-', ' ')],
+  href: `/tools/audiofy-suite#${tool.id}`,
+  audioSubtool: true,
+  icon: tool.icon,
+}));
+
+export const TOOLS = [
+  ...CATALOGUE.map((tool) => ({ ...tool, ...IMPLEMENTATIONS[tool.id] })),
+  ...AUDIOFY_ENTRIES,
+];
 
 export const getTool = (id) => TOOLS.find((tool) => tool.id === id);
 

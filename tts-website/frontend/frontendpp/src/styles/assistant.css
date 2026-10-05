@@ -1,0 +1,209 @@
+.assistant-widget {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: calc(var(--z-overlay) + 1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+
+.assistant-widget-launcher {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 48px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--accent-soft-border);
+  border-radius: 999px;
+  background: var(--accent-gradient);
+  color: var(--text-on-accent);
+  box-shadow: var(--shadow-lg), var(--accent-glow);
+  font: inherit;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+
+.assistant-widget-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(390px, calc(100vw - 32px));
+  height: min(570px, calc(100dvh - 100px));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-xl);
+}
+
+.assistant-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.assistant-widget-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.assistant-widget-header small,
+.assistant-chat-privacy {
+  color: var(--text-muted);
+  font-size: var(--fs-11);
+}
+
+.assistant-widget-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.assistant-widget-actions a {
+  font-size: var(--fs-12);
+}
+
+.assistant-widget-actions button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--r-control);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.assistant-chat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-height: 0;
+  padding: var(--sp-4);
+}
+
+.assistant-chat-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  line-height: 1.45;
+}
+
+.assistant-chat-messages {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-height: 100px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.assistant-chat-starters {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: auto 0;
+}
+
+.assistant-chat-starters button {
+  max-width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-12);
+  text-align: left;
+  cursor: pointer;
+}
+
+.assistant-message {
+  max-width: 90%;
+  margin: 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-control);
+  font-size: var(--fs-13);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.assistant-message.user {
+  align-self: flex-end;
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.assistant-message.assistant {
+  align-self: flex-start;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.assistant-chat-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--fs-12);
+}
+
+.assistant-chat-form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+}
+
+.assistant-chat-form textarea {
+  flex: 1;
+  min-width: 0;
+  resize: vertical;
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-13);
+}
+
+.assistant-chat-form button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--r-control);
+  background: var(--accent-gradient);
+  color: var(--text-on-accent);
+  cursor: pointer;
+}
+
+.assistant-chat-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.assistant-chat-privacy {
+  line-height: 1.4;
+}
+
+@media (max-width: 540px) {
+  .assistant-widget {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .assistant-widget-panel {
+    height: min(540px, calc(100dvh - 86px));
+  }
+}

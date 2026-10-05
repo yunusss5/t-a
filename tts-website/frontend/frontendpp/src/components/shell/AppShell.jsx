@@ -5,6 +5,7 @@ import { Heart, Menu, Moon, Search, Sun } from 'lucide-react';
 import Sidebar from './Sidebar';
 import CommandPalette from './CommandPalette';
 import SupportModal from './SupportModal';
+import AssistantWidget from '../ai/AssistantWidget';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import useScrollLock from '../../hooks/useScrollLock';
 
@@ -147,6 +148,7 @@ export default function AppShell({ children, favourites }) {
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
+      <AssistantWidget />
     </div>
   );
 }

@@ -6,6 +6,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { CATALOGUE, CATEGORIES } from './catalogue';
+import { AUDIOFY_TOOLS } from './audiofy/registry';
 import { TOOLS, getTool, relatedTools, searchTools, toolsByCategory } from './registry';
 import { clampDescription, toolSeo } from '../lib/seo';
 
@@ -21,10 +22,21 @@ describe('catalogue integrity', () => {
 
   it('gives every tool an implementation, and ships no orphan implementations', () => {
     TOOLS.forEach((tool) => {
-      expect(tool.component, `${tool.id} has no component`).toBeTruthy();
       expect(tool.icon, `${tool.id} has no icon`).toBeTruthy();
+      if (tool.audioSubtool) {
+        expect(tool.href, `${tool.id} has no direct route`).toContain(`#${tool.id}`);
+      } else {
+        expect(tool.component, `${tool.id} has no component`).toBeTruthy();
+      }
     });
-    expect(TOOLS).toHaveLength(CATALOGUE.length);
+    expect(TOOLS).toHaveLength(CATALOGUE.length + AUDIOFY_TOOLS.length);
+  });
+
+  it('lists all AudioKit tools individually and points each at its suite tool', () => {
+    const audioTools = TOOLS.filter((tool) => tool.audioSubtool);
+    expect(audioTools).toHaveLength(50);
+    expect(new Set(TOOLS.map((tool) => tool.id)).size).toBe(TOOLS.length);
+    audioTools.forEach((tool) => expect(tool.href).toBe(`/tools/audiofy-suite#${tool.id}`));
   });
 
   it('places every tool in a real category with a real accent', () => {
@@ -105,11 +117,10 @@ describe('lookup helpers', () => {
 
 describe('searchTools', () => {
   it('returns everything for an empty query', () => {
-    expect(searchTools('   ')).toHaveLength(CATALOGUE.length);
+    expect(searchTools('   ')).toHaveLength(TOOLS.length);
   });
 
   it('matches on a keyword the name never mentions', () => {
-    // "flesch" only exists in content-analyzer's keywords.
     expect(searchTools('flesch').map((tool) => tool.id)).toEqual(['content-analyzer']);
   });
 

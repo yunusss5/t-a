@@ -24,7 +24,9 @@ import time
 
 from config import settings
 
-from .prompts import assist_messages, ideas_messages, sanitise, seo_polish_messages
+from .prompts import (
+    SYSTEM_PROMPTS, assist_messages, ideas_messages, sanitise, seo_polish_messages,
+)
 from .providers import AiFailed, AiUnavailable, BaseProvider, build_provider
 
 logger = logging.getLogger("voiceforge.ai")
@@ -103,6 +105,16 @@ ASSIST_TASKS: dict[str, dict[str, str]] = {
             "plain numbered list."
         ),
     },
+    "faq": {
+        "label": "FAQ set",
+        "hint": "Six questions people actually ask, with real answers",
+        "instruction": (
+            "Write 6 frequently asked questions about this material, in the voice a "
+            "helpful expert would use. Format each as 'Q: <question>' on its own line "
+            "followed by 'A: <answer>' on the next — answers one to three sentences, "
+            "factual, no marketing filler. Only ask things the material actually answers."
+        ),
+    },
 }
 
 TONES = (
@@ -117,6 +129,7 @@ TONES = (
 # accidental empty submit is caught before a model call is paid for.
 MIN_ASSIST_CHARS = 12
 MIN_TRANSCRIPT_CHARS = 200
+MAX_CHAT_MESSAGES = 12
 
 _provider: BaseProvider = build_provider(settings.ai)
 
@@ -217,6 +230,44 @@ def _prepare(text: str, label: str, minimum: int) -> str:
 def _tone(requested: str | None) -> str:
     """Tone reaches the prompt as prose, so it comes from the list or not at all."""
     return requested if requested in TONES else TONES[0]
+
+
+async def chat(messages: list[dict]) -> dict:
+    """Answer a short, unsaved conversation using the server-configured model."""
+    if not isinstance(messages, list) or not messages or len(messages) > MAX_CHAT_MESSAGES:
+        raise AiInputRejected(
+            f"Send between 1 and {MAX_CHAT_MESSAGES} recent messages."
+        )
+
+    history: list[dict[str, str]] = []
+    total_chars = 0
+    for message in messages:
+        if not isinstance(message, dict) or message.get("role") not in {"user", "assistant"}:
+            raise AiInputRejected("Each message must be from the user or assistant.")
+
+        content = message.get("content")
+        if not isinstance(content, str) or not content.strip():
+            raise AiInputRejected("Messages cannot be empty.")
+
+        total_chars += len(content)
+        if total_chars > settings.ai.max_input_chars:
+            raise AiInputRejected(
+                f"Keep the conversation under {settings.ai.max_input_chars:,} characters."
+            )
+
+        history.append({
+            "role": message["role"],
+            "content": sanitise(content, settings.ai.max_input_chars),
+        })
+
+    if history[-1]["role"] != "user":
+        raise AiInputRejected("The latest message must be from the user.")
+
+    reply = await require_provider().complete([
+        {"role": "system", "content": SYSTEM_PROMPTS["chat"]},
+        *history,
+    ])
+    return {"text": reply.text, "model": reply.model}
 
 
 _CODE_FENCE = re.compile(r"^```[a-zA-Z0-9]*\s*|\s*```$")

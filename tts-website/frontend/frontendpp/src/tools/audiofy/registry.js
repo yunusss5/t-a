@@ -57,7 +57,7 @@ const BESPOKE_TOOLS = [
   { id: 'audio-recorder', name: 'Audio Recorder', icon: Mic, category: 'record', description: 'Record any input straight from your microphone.', component: AudioRecorder },
   { id: 'voice-recorder', name: 'Voice Recorder', icon: Mic, category: 'record', description: 'Quick voice memos with noise suppression on.', component: VoiceRecorder },
   { id: 'ringtone-maker', name: 'Ringtone Maker', icon: Sparkles, category: 'record', description: 'Select a span, add fades, and export it ready for a phone.', component: RingtoneMaker },
-  { id: 'text-to-speech', name: 'Text to Speech', icon: Speaker, category: 'record', description: 'Neural voices in 100+ languages — served by the site’s TTS tool.', component: TtsBridge },
+  { id: 'audiofy-tts-bridge', name: 'Text to Speech Bridge', icon: Speaker, category: 'record', description: 'Send a text passage to the site’s neural voice tool and return with the audio ready to download.', component: TtsBridge },
   { id: 'tone-generator', name: 'Tone Generator', icon: Waves, category: 'record', description: 'Generate test tones from 20 Hz to 20 kHz, playable and exportable.', component: ToneGenerator },
 ];
 
@@ -85,7 +85,7 @@ const ORDER = [
   // Analyze & Meter
   'bpm-detector', 'key-detector', 'waveform-image', 'spectrum', 'loudness-meter', 'mix-checker',
   // Record & Voice
-  'audio-recorder', 'voice-recorder', 'ringtone-maker', 'karaoke-maker', 'text-to-speech',
+  'audio-recorder', 'voice-recorder', 'ringtone-maker', 'karaoke-maker', 'audiofy-tts-bridge',
   'tone-generator',
 ];
 
