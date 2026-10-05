@@ -24,7 +24,7 @@ export const ru = {
   'home.title.audio': 'работы со звуком',
   'home.title.after': ' — в одном месте.',
   'home.description': 'Создавайте озвучку, расшифровывайте речь, редактируйте аудио и используйте инструменты записи, конвертации, эффектов и анализа.',
-  'home.openAudioKit': 'Открыть AudioKit',
+  'home.openAudioKit': 'Посмотреть все инструменты',
   'home.tryTextToSpeech': 'Попробовать синтез речи',
   'home.searchPlaceholder': 'Поиск по названию или задаче…',
   'home.filterByCategory': 'Фильтр по категории',

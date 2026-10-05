@@ -24,7 +24,7 @@ export const en = {
   'home.title.audio': 'audio',
   'home.title.after': ', in one place.',
   'home.description': 'Create voiceovers, transcribe speech, edit audio, and explore a full suite of recording, conversion, effects, and analysis tools.',
-  'home.openAudioKit': 'Open AudioKit',
+  'home.openAudioKit': 'Explore All Tools',
   'home.tryTextToSpeech': 'Try Text to Speech',
   'home.searchPlaceholder': 'Search by name or what you need to do…',
   'home.filterByCategory': 'Filter by category',

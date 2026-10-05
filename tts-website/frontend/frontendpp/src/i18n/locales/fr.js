@@ -24,7 +24,7 @@ export const fr = {
   'home.title.audio': 'l’audio',
   'home.title.after': ', au même endroit.',
   'home.description': 'Créez des voix off, transcrivez la parole, éditez l’audio et découvrez des outils d’enregistrement, de conversion, d’effets et d’analyse.',
-  'home.openAudioKit': 'Ouvrir AudioKit',
+  'home.openAudioKit': 'Explorer tous les outils',
   'home.tryTextToSpeech': 'Essayer la synthèse vocale',
   'home.searchPlaceholder': 'Rechercher par nom ou par tâche…',
   'home.filterByCategory': 'Filtrer par catégorie',

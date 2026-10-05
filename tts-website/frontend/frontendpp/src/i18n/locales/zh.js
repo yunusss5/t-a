@@ -24,7 +24,7 @@ export const zh = {
   'home.title.audio': '尽在一处',
   'home.title.after': '。',
   'home.description': '制作配音、转录语音、编辑音频，并使用录制、转换、效果和分析工具。',
-  'home.openAudioKit': '打开 AudioKit',
+  'home.openAudioKit': '探索所有工具',
   'home.tryTextToSpeech': '试用文字转语音',
   'home.searchPlaceholder': '按名称或任务搜索…',
   'home.filterByCategory': '按类别筛选',

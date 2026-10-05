@@ -24,7 +24,7 @@ export const bn = {
   'home.title.audio': 'এক জায়গায়',
   'home.title.after': '।',
   'home.description': 'ভয়েসওভার তৈরি করুন, কথা লিখে নিন, অডিও সম্পাদনা করুন এবং রেকর্ডিং, রূপান্তর, ইফেক্ট ও বিশ্লেষণের টুল ব্যবহার করুন।',
-  'home.openAudioKit': 'AudioKit খুলুন',
+  'home.openAudioKit': 'সব টুল দেখুন',
   'home.tryTextToSpeech': 'টেক্সট-টু-স্পিচ ব্যবহার করুন',
   'home.searchPlaceholder': 'নাম বা কাজ দিয়ে খুঁজুন…',
   'home.filterByCategory': 'বিভাগ অনুযায়ী ফিল্টার',

@@ -24,7 +24,7 @@ export const pt = {
   'home.title.audio': 'áudio',
   'home.title.after': ', em um só lugar.',
   'home.description': 'Crie narrações, transcreva fala, edite áudio e explore ferramentas de gravação, conversão, efeitos e análise.',
-  'home.openAudioKit': 'Abrir AudioKit',
+  'home.openAudioKit': 'Explorar todas as ferramentas',
   'home.tryTextToSpeech': 'Testar conversão de texto em fala',
   'home.searchPlaceholder': 'Busque por nome ou tarefa…',
   'home.filterByCategory': 'Filtrar por categoria',

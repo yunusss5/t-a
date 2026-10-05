@@ -24,7 +24,7 @@ export const ar = {
   'home.title.audio': 'في مكان واحد',
   'home.title.after': '.',
   'home.description': 'أنشئ التعليق الصوتي، وحوّل الكلام إلى نص، وعدّل الصوت، واستكشف أدوات التسجيل والتحويل والمؤثرات والتحليل.',
-  'home.openAudioKit': 'افتح AudioKit',
+  'home.openAudioKit': 'استكشف جميع الأدوات',
   'home.tryTextToSpeech': 'جرّب تحويل النص إلى كلام',
   'home.searchPlaceholder': 'ابحث بالاسم أو بالمهمة…',
   'home.filterByCategory': 'تصفية حسب الفئة',

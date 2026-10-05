@@ -24,7 +24,7 @@ export const es = {
   'home.title.audio': 'audio',
   'home.title.after': ', en un solo lugar.',
   'home.description': 'Crea locuciones, transcribe voz, edita audio y explora herramientas de grabación, conversión, efectos y análisis.',
-  'home.openAudioKit': 'Abrir AudioKit',
+  'home.openAudioKit': 'Explorar todas las herramientas',
   'home.tryTextToSpeech': 'Probar texto a voz',
   'home.searchPlaceholder': 'Busca por nombre o por lo que necesitas hacer…',
   'home.filterByCategory': 'Filtrar por categoría',

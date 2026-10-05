@@ -24,7 +24,7 @@ export const hi = {
   'home.title.audio': 'एक ही जगह',
   'home.title.after': '।',
   'home.description': 'वॉइसओवर बनाएँ, भाषण को टेक्स्ट में बदलें, ऑडियो संपादित करें और रिकॉर्डिंग, रूपांतरण, प्रभाव व विश्लेषण टूल इस्तेमाल करें।',
-  'home.openAudioKit': 'AudioKit खोलें',
+  'home.openAudioKit': 'सभी टूल देखें',
   'home.tryTextToSpeech': 'टेक्स्ट-टू-स्पीच आज़माएँ',
   'home.searchPlaceholder': 'नाम या काम के आधार पर खोजें…',
   'home.filterByCategory': 'श्रेणी के अनुसार फ़िल्टर करें',

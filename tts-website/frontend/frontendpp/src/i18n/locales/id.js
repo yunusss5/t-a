@@ -24,7 +24,7 @@ export const id = {
   'home.title.audio': 'audio',
   'home.title.after': ', di satu tempat.',
   'home.description': 'Buat sulih suara, transkripsikan ucapan, edit audio, dan jelajahi alat perekaman, konversi, efek, serta analisis.',
-  'home.openAudioKit': 'Buka AudioKit',
+  'home.openAudioKit': 'Jelajahi Semua Alat',
   'home.tryTextToSpeech': 'Coba teks ke ucapan',
   'home.searchPlaceholder': 'Cari berdasarkan nama atau tugas…',
   'home.filterByCategory': 'Filter berdasarkan kategori',
