@@ -295,3 +295,6 @@ export const CATALOGUE = [
     keywords: ['notes', 'notepad', 'scratchpad', 'todo', 'draft'],
   },
 ];
+
+export const ACTIVE_CATEGORIES = CATEGORIES.filter((category) => category.id === 'audio');
+export const ACTIVE_CATALOGUE = CATALOGUE.filter((tool) => tool.category === 'audio');

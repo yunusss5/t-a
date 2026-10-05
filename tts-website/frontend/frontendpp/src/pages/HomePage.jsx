@@ -25,8 +25,6 @@ export default function HomePage({ favourites, onToggleFavourite }) {
     return filter === 'all' ? found : found.filter((tool) => tool.category === filter);
   }, [query, filter]);
 
-  const flagship = TOOLS[0];
-
   return (
     <div className="home">
       <section className="hero">
@@ -35,18 +33,18 @@ export default function HomePage({ favourites, onToggleFavourite }) {
         </span>
 
         <h1>
-          Everything you need to <span className="grad-text">publish</span>, in one place.
+          Everything you need for <span className="grad-text">audio</span>, in one place.
         </h1>
 
         <p className="hero-sub">
-          Turn a transcript or a YouTube link into SEO-ready titles, descriptions, hashtags and
-          keywords. Then narrate it, subtitle it, resize it and ship it — all from one dashboard.
+          Create voiceovers, transcribe speech, edit audio, and explore a full suite of recording,
+          conversion, effects, and analysis tools.
         </p>
 
         <div className="hero-actions">
-          <Link to={flagship.href || `/tools/${flagship.id}`} className="ui-btn ui-btn-primary hero-cta">
+          <Link to="/tools/audiofy-suite" className="ui-btn ui-btn-primary hero-cta">
             <Sparkles size={16} aria-hidden="true" />
-            Open SEO Content Studio
+            Open AudioKit
             <ArrowRight size={16} aria-hidden="true" />
           </Link>
           <Link to="/tools/text-to-speech" className="ui-btn ui-btn-ghost">

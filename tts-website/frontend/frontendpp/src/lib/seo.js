@@ -27,7 +27,7 @@ export const SITE = {
   language: 'en',
   ogImage: '/og-cover.png',
   description:
-    'A free toolkit for creators: turn a transcript or YouTube link into SEO titles, descriptions, hashtags and keywords, then narrate, subtitle and resize what you publish.',
+    'Free audio and voice tools: create text-to-speech voiceovers, transcribe speech, edit and convert audio, apply effects, and analyze recordings.',
 };
 
 /** Resolve a root-relative path against the configured origin. */
@@ -49,7 +49,7 @@ export function clampDescription(text, max = 158) {
 /** SEO record for the dashboard. */
 export function homeSeo(toolCount = 0) {
   return {
-    title: `${SITE.name} — ${toolCount || ''} free creator tools for SEO, voice and video`.replace(
+    title: `${SITE.name} — ${toolCount || ''} free audio and voice tools`.replace(
       /\s+/g,
       ' ',
     ),
@@ -77,7 +77,7 @@ export function toolSeo(tool) {
 export function notFoundSeo() {
   return {
     title: `Page not found | ${SITE.name}`,
-    description: 'That page does not exist. Every tool is listed on the dashboard.',
+    description: 'That page does not exist. Browse the Audio & Voice tools on the dashboard.',
     path: '/404',
     noindex: true,
     jsonLd: [],
@@ -135,7 +135,7 @@ function softwareJsonLd(tool) {
 
 function breadcrumbJsonLd(tool) {
   const items = [
-    { '@type': 'ListItem', position: 1, name: 'All tools', item: absoluteUrl('/') },
+    { '@type': 'ListItem', position: 1, name: 'Audio & Voice', item: absoluteUrl('/') },
   ];
   const category = CATEGORIES.find((item) => item.id === tool.category);
   if (category) {

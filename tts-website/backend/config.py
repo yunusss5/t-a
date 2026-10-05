@@ -65,6 +65,7 @@ def _list_env(name: str, default: list[str]) -> list[str]:
 # the default so a developer can always run the frontend against a deployed
 # backend; set ALLOWED_ORIGINS in production to drop them.
 DEFAULT_ORIGINS = [
+    "http://localhost:5173",
     "http://localhost:5174",
     "https://voiceforge-toolkit.vercel.app",
     "https://texttospeechin.vercel.app",

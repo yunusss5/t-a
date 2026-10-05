@@ -19,7 +19,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { CATALOGUE } from '../../src/tools/catalogue.js';
+import { ACTIVE_CATALOGUE } from '../../src/tools/catalogue.js';
 import { SITE, absoluteUrl, homeSeo, notFoundSeo, toolSeo } from '../../src/lib/seo.js';
 
 const SEO_REGION = /<!-- seo:start -->[\s\S]*?<!-- seo:end -->/;
@@ -261,11 +261,11 @@ export default function seoPrerender() {
         indexPath,
         renderRoute(
           template,
-          homeSeo(CATALOGUE.length),
+          homeSeo(ACTIVE_CATALOGUE.length),
           {
             heading: SITE.fullName,
             body: SITE.description,
-            links: CATALOGUE.map((tool) => ({
+            links: ACTIVE_CATALOGUE.map((tool) => ({
               href: `/tools/${tool.id}`,
               label: `${tool.name} — ${tool.tagline}`,
             })),
@@ -276,7 +276,7 @@ export default function seoPrerender() {
       );
       written.push('index.html');
 
-      for (const tool of CATALOGUE) {
+      for (const tool of ACTIVE_CATALOGUE) {
         const dir = path.join(outDir, 'tools', tool.id);
         await mkdir(dir, { recursive: true });
         await writeFile(
@@ -289,7 +289,7 @@ export default function seoPrerender() {
               body: tool.description || tool.tagline,
               links: [
                 { href: '/', label: 'All VoiceForge tools' },
-                ...CATALOGUE.filter(
+                ...ACTIVE_CATALOGUE.filter(
                   (item) => item.category === tool.category && item.id !== tool.id,
                 )
                   .slice(0, 4)
@@ -326,7 +326,7 @@ export default function seoPrerender() {
         path.join(outDir, 'sitemap.xml'),
         sitemap([
           { path: '/', priority: '1.0' },
-          ...CATALOGUE.map((tool) => ({ path: `/tools/${tool.id}`, priority: '0.8' })),
+          ...ACTIVE_CATALOGUE.map((tool) => ({ path: `/tools/${tool.id}`, priority: '0.8' })),
         ]),
         'utf8',
       );

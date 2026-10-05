@@ -5,15 +5,20 @@
 // neither shows up in a screenshot — so it is checked here instead.
 
 import { describe, expect, it } from 'vitest';
-import { CATALOGUE, CATEGORIES } from './catalogue';
+import { ACTIVE_CATALOGUE, ACTIVE_CATEGORIES, CATALOGUE } from './catalogue';
 import { AUDIOFY_TOOLS } from './audiofy/registry';
 import { TOOLS, getTool, relatedTools, searchTools, toolsByCategory } from './registry';
 import { clampDescription, toolSeo } from '../lib/seo';
 
 const ACCENTS = ['violet', 'rose', 'amber', 'emerald', 'sky'];
-const CATEGORY_IDS = CATEGORIES.map((category) => category.id);
+const CATEGORY_IDS = ACTIVE_CATEGORIES.map((category) => category.id);
 
 describe('catalogue integrity', () => {
+  it('exposes only the Audio & Voice category', () => {
+    expect(ACTIVE_CATEGORIES.map((category) => category.label)).toEqual(['Audio & Voice']);
+    expect(TOOLS.every((tool) => tool.category === 'audio')).toBe(true);
+  });
+
   it('has a unique, URL-safe id per tool', () => {
     const ids = CATALOGUE.map((tool) => tool.id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -29,7 +34,8 @@ describe('catalogue integrity', () => {
         expect(tool.component, `${tool.id} has no component`).toBeTruthy();
       }
     });
-    expect(TOOLS).toHaveLength(CATALOGUE.length + AUDIOFY_TOOLS.length);
+    expect(TOOLS).toHaveLength(ACTIVE_CATALOGUE.length + AUDIOFY_TOOLS.length);
+    expect(TOOLS.every((tool) => tool.category === 'audio')).toBe(true);
   });
 
   it('lists all AudioKit tools individually and points each at its suite tool', () => {
@@ -40,7 +46,7 @@ describe('catalogue integrity', () => {
   });
 
   it('places every tool in a real category with a real accent', () => {
-    CATALOGUE.forEach((tool) => {
+    ACTIVE_CATALOGUE.forEach((tool) => {
       expect(CATEGORY_IDS, `${tool.id} category`).toContain(tool.category);
       expect(ACCENTS, `${tool.id} accent`).toContain(tool.accent);
     });
@@ -51,13 +57,13 @@ describe('catalogue integrity', () => {
   });
 
   it('gives each tool a distinct name and a tagline short enough for a card', () => {
-    const names = CATALOGUE.map((tool) => tool.name);
+    const names = ACTIVE_CATALOGUE.map((tool) => tool.name);
     expect(new Set(names).size).toBe(names.length);
-    CATALOGUE.forEach((tool) => expect(tool.tagline.length).toBeLessThanOrEqual(72));
+    ACTIVE_CATALOGUE.forEach((tool) => expect(tool.tagline.length).toBeLessThanOrEqual(72));
   });
 
   it('carries search keywords so the palette can find a tool by what it does', () => {
-    CATALOGUE.forEach((tool) => {
+    ACTIVE_CATALOGUE.forEach((tool) => {
       expect(Array.isArray(tool.keywords), `${tool.id} keywords`).toBe(true);
       expect(tool.keywords.length).toBeGreaterThanOrEqual(3);
     });
@@ -92,12 +98,13 @@ describe('per-tool SEO records', () => {
 
 describe('lookup helpers', () => {
   it('finds a tool by id and returns undefined for one that does not exist', () => {
-    expect(getTool('seo-studio').name).toBe('SEO Content Studio');
+    expect(getTool('text-to-speech').name).toBe('Text to Speech');
+    expect(getTool('seo-studio')).toBeUndefined();
     expect(getTool('nope')).toBeUndefined();
   });
 
   it('never suggests the page you are already on, and always fills the row', () => {
-    CATALOGUE.forEach((tool) => {
+    ACTIVE_CATALOGUE.forEach((tool) => {
       const related = relatedTools(tool, 4);
       expect(related).toHaveLength(4);
       expect(related.map((item) => item.id)).not.toContain(tool.id);
@@ -106,8 +113,8 @@ describe('lookup helpers', () => {
   });
 
   it('prefers siblings from the same category', () => {
-    const [first] = relatedTools(getTool('word-counter'));
-    expect(first.category).toBe('text');
+    const [first] = relatedTools(getTool('text-to-speech'));
+    expect(first.category).toBe('audio');
   });
 
   it('tolerates a missing tool rather than throwing on an unknown route', () => {
@@ -121,7 +128,7 @@ describe('searchTools', () => {
   });
 
   it('matches on a keyword the name never mentions', () => {
-    expect(searchTools('flesch').map((tool) => tool.id)).toEqual(['content-analyzer']);
+    expect(searchTools('bpm').map((tool) => tool.id)).toContain('bpm-detector');
   });
 
   it('requires every term, so a second word narrows rather than widens', () => {
@@ -132,7 +139,7 @@ describe('searchTools', () => {
   });
 
   it('ignores case and surrounding space', () => {
-    expect(searchTools('  QR CODE  ').map((tool) => tool.id)).toContain('qr-generator');
+    expect(searchTools('  TEXT TO SPEECH  ').map((tool) => tool.id)).toContain('text-to-speech');
   });
 
   it('returns nothing for a query that matches nothing', () => {

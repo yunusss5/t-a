@@ -7,7 +7,7 @@ import useSeo from '../hooks/useSeo';
 
 // A handful of genuinely popular destinations, not the whole catalogue: a 404
 // that dumps 23 links is a sitemap, not a recovery.
-const SUGGESTED = ['seo-studio', 'text-to-speech', 'subtitle-studio', 'image-studio'];
+const SUGGESTED = ['text-to-speech', 'audio-studio', 'audiofy-suite', 'subtitle-studio'];
 
 /**
  * Real 404 page. The previous behaviour — redirecting every unknown URL to `/`
@@ -29,13 +29,13 @@ export default function NotFoundPage() {
       <p className="not-found-code">404</p>
       <h1>This page doesn’t exist</h1>
       <p className="not-found-lead">
-        The link may be out of date or mistyped. Every tool is listed on the dashboard — or start
-        with one of these.
+        The link may be out of date or mistyped. Browse the Audio &amp; Voice tools or start with
+        one of these.
       </p>
 
       <div className="btn-row">
         <Link to="/" className="ui-btn ui-btn-primary">
-          <ArrowLeft size={16} aria-hidden="true" /> Back to all tools
+          <ArrowLeft size={16} aria-hidden="true" /> Back to Audio &amp; Voice tools
         </Link>
       </div>
 

@@ -13,10 +13,10 @@ import {
   FileType2, Image, KeyRound, MessageCircle, Mic, Music4, Notebook, Palette, PenLine,
   QrCode, Ruler, ScanSearch, Sparkles, Type, Volume2, Wand2, SquarePlay,
 } from 'lucide-react';
-import { CATALOGUE, CATEGORIES } from './catalogue';
+import { ACTIVE_CATALOGUE, ACTIVE_CATEGORIES } from './catalogue';
 import { AUDIOFY_CATEGORIES, AUDIOFY_TOOLS } from './audiofy/registry';
 
-export { CATEGORIES };
+export const CATEGORIES = ACTIVE_CATEGORIES;
 
 /**
  * id → { icon, component }. Every tool is lazy-loaded so the first paint only
@@ -68,7 +68,7 @@ const AUDIOFY_ENTRIES = AUDIOFY_TOOLS.map((tool) => ({
 }));
 
 export const TOOLS = [
-  ...CATALOGUE.map((tool) => ({ ...tool, ...IMPLEMENTATIONS[tool.id] })),
+  ...ACTIVE_CATALOGUE.map((tool) => ({ ...tool, ...IMPLEMENTATIONS[tool.id] })),
   ...AUDIOFY_ENTRIES,
 ];
 

@@ -81,6 +81,20 @@ def test_request_id_is_echoed_back(client):
     assert mine.headers["x-request-id"] == "abc123"
 
 
+def test_vite_default_localhost_origin_is_allowed_by_cors(client):
+    response = client.options(
+        "/api/ai/chat",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
 def test_large_json_is_compressed(client):
     response = client.post("/api/seo/from-text", data={"text": TRANSCRIPT})
 

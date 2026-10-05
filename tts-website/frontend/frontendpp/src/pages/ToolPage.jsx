@@ -46,7 +46,7 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
     >
       <header className="tool-head">
         <Link to="/" className="back-link">
-          <ArrowLeft size={15} aria-hidden="true" /> All tools
+          <ArrowLeft size={15} aria-hidden="true" /> Audio &amp; Voice
         </Link>
 
         <div className="tool-head-main">
