@@ -12,11 +12,21 @@ export default function FaqSection({ faqs, title = 'Frequently asked questions' 
   if (!faqs?.length) return null;
 
   return (
-    <Panel title={title}>
+    <Panel
+      className="faq-panel"
+      title={title}
+      hint="Clear answers to common questions about this tool."
+    >
       <div className="faq-list">
-        {faqs.map(({ question, answer }) => (
+        {faqs.map(({ question, answer }, index) => (
           <details key={question} className="faq-item">
-            <summary>{question}</summary>
+            <summary>
+              <span className="faq-number" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="faq-question">{question}</span>
+              <span className="faq-toggle" aria-hidden="true" />
+            </summary>
             <p>{answer}</p>
           </details>
         ))}
