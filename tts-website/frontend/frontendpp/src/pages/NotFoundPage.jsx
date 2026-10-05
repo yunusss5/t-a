@@ -4,6 +4,7 @@ import { ArrowLeft, Compass } from 'lucide-react';
 import { TOOLS } from '../tools/registry';
 import { notFoundSeo } from '../lib/seo';
 import useSeo from '../hooks/useSeo';
+import { useI18n } from '../i18n';
 
 // A handful of genuinely popular destinations, not the whole catalogue: a 404
 // that dumps 23 links is a sitemap, not a recovery.
@@ -17,6 +18,7 @@ const SUGGESTED = ['text-to-speech', 'audio-studio', 'audiofy-suite', 'subtitle-
  */
 export default function NotFoundPage() {
   useSeo(notFoundSeo());
+  const { t } = useI18n();
 
   const suggestions = SUGGESTED.map((id) => TOOLS.find((tool) => tool.id === id)).filter(Boolean);
 
@@ -27,15 +29,14 @@ export default function NotFoundPage() {
       </span>
 
       <p className="not-found-code">404</p>
-      <h1>This page doesn’t exist</h1>
+      <h1>{t('notFound.title')}</h1>
       <p className="not-found-lead">
-        The link may be out of date or mistyped. Browse the Audio &amp; Voice tools or start with
-        one of these.
+        {t('notFound.description')}
       </p>
 
       <div className="btn-row">
         <Link to="/" className="ui-btn ui-btn-primary">
-          <ArrowLeft size={16} aria-hidden="true" /> Back to Audio &amp; Voice tools
+          <ArrowLeft size={16} aria-hidden="true" /> {t('notFound.back')}
         </Link>
       </div>
 

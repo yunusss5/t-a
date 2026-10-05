@@ -361,6 +361,41 @@
   margin-left: auto;
 }
 
+.language-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-width: var(--ctl-md);
+  min-height: var(--ctl-md);
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.language-select svg {
+  flex: none;
+}
+
+.language-select select {
+  max-width: 112px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-12);
+  cursor: pointer;
+}
+
+.language-select option {
+  color: var(--text);
+  background: var(--surface);
+}
+
 .shell-content {
   flex: 1;
   width: 100%;
@@ -738,6 +773,21 @@
 
   .support-btn > span {
     display: none;
+  }
+
+  .language-select {
+    width: var(--ctl-md);
+    min-width: var(--ctl-md);
+    padding: 0;
+  }
+
+  .language-select select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    opacity: 0;
+    cursor: pointer;
   }
 
   .palette-scrim {

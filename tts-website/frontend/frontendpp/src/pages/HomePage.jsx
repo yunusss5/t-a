@@ -7,8 +7,7 @@ import { CATEGORIES, TOOLS, searchTools } from '../tools/registry';
 import { homeSeo } from '../lib/seo';
 import useSeo from '../hooks/useSeo';
 import { cx } from '../lib/utils';
-
-const FILTERS = [{ id: 'all', label: 'All' }, ...CATEGORIES];
+import { useI18n } from '../i18n';
 
 export default function HomePage({ favourites, onToggleFavourite }) {
   const [searchParams] = useSearchParams();
@@ -17,6 +16,11 @@ export default function HomePage({ favourites, onToggleFavourite }) {
   // write back to the URL — one history entry per keystroke is unusable.
   const [query, setQuery] = useState(() => searchParams.get('q') || '');
   const [filter, setFilter] = useState('all');
+  const { t } = useI18n();
+  const filters = [
+    { id: 'all', label: t('home.all') },
+    ...CATEGORIES.map((category) => ({ ...category, label: t(`category.${category.id}`) })),
+  ];
 
   useSeo(homeSeo(TOOLS.length));
 
@@ -29,26 +33,26 @@ export default function HomePage({ favourites, onToggleFavourite }) {
     <div className="home">
       <section className="hero">
         <span className="hero-pill">
-          <Sparkles size={13} aria-hidden="true" /> {TOOLS.length} free tools · no sign-up
+          <Sparkles size={13} aria-hidden="true" /> {t('home.heroPill', { count: TOOLS.length })}
         </span>
 
         <h1>
-          Everything you need for <span className="grad-text">audio</span>, in one place.
+          {t('home.title.before')}<span className="grad-text">{t('home.title.audio')}</span>
+          {t('home.title.after')}
         </h1>
 
         <p className="hero-sub">
-          Create voiceovers, transcribe speech, edit audio, and explore a full suite of recording,
-          conversion, effects, and analysis tools.
+          {t('home.description')}
         </p>
 
         <div className="hero-actions">
           <Link to="/tools/audiofy-suite" className="ui-btn ui-btn-primary hero-cta">
             <Sparkles size={16} aria-hidden="true" />
-            Open AudioKit
+            {t('home.openAudioKit')}
             <ArrowRight size={16} aria-hidden="true" />
           </Link>
           <Link to="/tools/text-to-speech" className="ui-btn ui-btn-ghost">
-            Try Text to Speech
+            {t('home.tryTextToSpeech')}
           </Link>
         </div>
       </section>
@@ -67,14 +71,14 @@ export default function HomePage({ favourites, onToggleFavourite }) {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by name or what you need to do…"
-              aria-label="Search tools"
+              placeholder={t('home.searchPlaceholder')}
+              aria-label={t('app.searchTools')}
               autoComplete="off"
             />
           </div>
 
-          <div className="filter-row" role="group" aria-label="Filter by category">
-            {FILTERS.map((item) => (
+          <div className="filter-row" role="group" aria-label={t('home.filterByCategory')}>
+            {filters.map((item) => (
               <button
                 key={item.id}
                 type="button"
@@ -89,12 +93,12 @@ export default function HomePage({ favourites, onToggleFavourite }) {
         </div>
 
         <p className="sr-only" aria-live="polite">
-          {visible.length} {visible.length === 1 ? 'tool' : 'tools'} shown
+          {t('home.toolShown', { count: visible.length })}
         </p>
 
         {visible.length === 0 ? (
           <p className="muted-line center">
-            Nothing matches “{query}”. Try “youtube”, “subtitle”, “compress” or “password”.
+            {t('home.noMatches', { query })}
           </p>
         ) : (
           <ul className="tool-cards">
@@ -105,6 +109,7 @@ export default function HomePage({ favourites, onToggleFavourite }) {
                 index={index}
                 favourite={favourites.includes(tool.id)}
                 onToggleFavourite={onToggleFavourite}
+                t={t}
               />
             ))}
           </ul>
@@ -114,7 +119,7 @@ export default function HomePage({ favourites, onToggleFavourite }) {
   );
 }
 
-function ToolCard({ tool, index, favourite, onToggleFavourite }) {
+function ToolCard({ tool, index, favourite, onToggleFavourite, t }) {
   const Icon = tool.icon;
   const reduceMotion = useReducedMotion();
 
@@ -149,7 +154,7 @@ function ToolCard({ tool, index, favourite, onToggleFavourite }) {
       </div>
 
       <span className="tool-card-foot">
-        <span className="tool-card-tag">{tool.server ? 'Cloud' : 'In-browser'}</span>
+        <span className="tool-card-tag">{tool.server ? t('home.cloud') : t('home.inBrowser')}</span>
         <ArrowRight size={15} className="tool-card-arrow" aria-hidden="true" />
       </span>
 
@@ -158,7 +163,7 @@ function ToolCard({ tool, index, favourite, onToggleFavourite }) {
         className={cx('fav-btn', favourite && 'active')}
         onClick={() => onToggleFavourite(tool.id)}
         aria-pressed={favourite}
-        aria-label={favourite ? `Remove ${tool.name} from favourites` : `Add ${tool.name} to favourites`}
+        aria-label={favourite ? t('home.removeFavourite', { name: tool.name }) : t('home.addFavourite', { name: tool.name })}
       >
         <Star size={14} aria-hidden="true" />
       </button>

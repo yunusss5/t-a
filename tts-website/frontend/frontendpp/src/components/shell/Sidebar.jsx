@@ -6,6 +6,7 @@ import { CATEGORIES, TOOLS, getTool } from '../../tools/registry';
 import { cx } from '../../lib/utils';
 import useFocusTrap from '../../hooks/useFocusTrap';
 import useMediaQuery from '../../hooks/useMediaQuery';
+import { useI18n } from '../../i18n';
 
 // Matches the breakpoint in shell.css where the rail becomes an overlay drawer.
 const DRAWER_QUERY = '(max-width: 900px)';
@@ -21,6 +22,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
 
   const isDrawer = useMediaQuery(DRAWER_QUERY);
   const isModal = isDrawer && open;
+  const { t } = useI18n();
 
   useFocusTrap(panelRef, isModal);
 
@@ -50,7 +52,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
         // stays a plain complementary landmark.
         role={isModal ? 'dialog' : undefined}
         aria-modal={isModal ? 'true' : undefined}
-        aria-label="Tool navigation"
+        aria-label={t('nav.toolNavigation')}
       >
         <div className="sidebar-head">
           <NavLink to="/" className="brand" onClick={onClose}>
@@ -67,7 +69,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
             </span>
             <span className="brand-text">
               <strong>VoiceForge</strong>
-              <small>Creator Toolkit</small>
+              <small>{t('app.creatorToolkit')}</small>
             </span>
           </NavLink>
 
@@ -76,7 +78,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
             ref={closeRef}
             className="icon-btn sidebar-close"
             onClick={onClose}
-            aria-label="Close menu"
+            aria-label={t('app.closeMenu')}
           >
             <X size={18} />
           </button>
@@ -90,7 +92,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
             onClick={onClose}
           >
             <LayoutGrid size={17} />
-            All tools
+            {t('nav.allTools')}
             {/* Derived, never hardcoded: the badge always matches the catalogue. */}
             <span className="side-count">{TOOLS.length}</span>
           </NavLink>
@@ -98,7 +100,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
           {favouriteTools.length > 0 && (
             <div className="side-group">
               <p className="side-group-label">
-                <Star size={12} /> Favourites
+                <Star size={12} /> {t('nav.favourites')}
               </p>
               {favouriteTools.map((tool) => (
                 <SideTool key={tool.id} tool={tool} onClose={onClose} />
@@ -113,7 +115,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
             return (
               <div className="side-group" key={category.id}>
                 <p className="side-group-label">
-                  {category.label}
+                  {t(`category.${category.id}`)}
                   <span className="side-group-count">{tools.length}</span>
                 </p>
                 {tools.map((tool) => (
@@ -125,7 +127,7 @@ export default function Sidebar({ open, onClose, favourites = [] }) {
         </nav>
 
         <div className="sidebar-foot">
-          <p>Free · no sign-up · nothing stored on our servers</p>
+          <p>{t('nav.sidebarNote')}</p>
         </div>
       </aside>
     </>

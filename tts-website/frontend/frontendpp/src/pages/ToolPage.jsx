@@ -10,6 +10,7 @@ import { cx } from '../lib/utils';
 import HowToSection from '../components/ui/HowToSection';
 import FaqSection from '../components/ui/FaqSection';
 import NotFoundPage from './NotFoundPage';
+import { useI18n } from '../i18n';
 
 /** Resolves :toolId from the route, renders the lazy tool inside a shared header. */
 export default function ToolPage({ favourites, onToggleFavourite }) {
@@ -31,6 +32,7 @@ export default function ToolPage({ favourites, onToggleFavourite }) {
 }
 
 function ToolView({ tool, favourite, onToggleFavourite }) {
+  const { t } = useI18n();
   const Icon = tool.icon;
   const Component = tool.component;
   const related = relatedTools(tool);
@@ -48,7 +50,7 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
     >
       <header className="tool-head">
         <Link to="/" className="back-link">
-          <ArrowLeft size={15} aria-hidden="true" /> Audio &amp; Voice
+          <ArrowLeft size={15} aria-hidden="true" /> {t('tool.back')}
         </Link>
 
         <div className="tool-head-main">
@@ -67,7 +69,9 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
             onClick={() => onToggleFavourite(tool.id)}
             aria-pressed={favourite}
             aria-label={
-              favourite ? `Remove ${tool.name} from favourites` : `Add ${tool.name} to favourites`
+              favourite
+                ? t('home.removeFavourite', { name: tool.name })
+                : t('home.addFavourite', { name: tool.name })
             }
           >
             <Star size={15} aria-hidden="true" />
@@ -79,7 +83,7 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
         fallback={
           <div className="tool-loading" role="status">
             <Loader2 className="spin" size={22} aria-hidden="true" />
-            <p>Loading {tool.name}…</p>
+            <p>{t('tool.loading', { name: tool.name })}</p>
           </div>
         }
       >
@@ -88,12 +92,12 @@ function ToolView({ tool, favourite, onToggleFavourite }) {
         <Component tool={tool} />
       </Suspense>
 
-      <HowToSection steps={tool.howTo} title={`How to use ${tool.name}`} />
+      <HowToSection steps={tool.howTo} title={t('tool.howTo', { name: tool.name })} />
       <FaqSection faqs={tool.faqs} />
 
       {related.length > 0 && (
         <section className="related" aria-labelledby="related-title">
-          <h2 id="related-title">Related tools</h2>
+          <h2 id="related-title">{t('tool.related')}</h2>
           <ul className="related-grid">
             {related.map((item) => {
               const RelatedIcon = item.icon;

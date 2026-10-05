@@ -1,12 +1,13 @@
 // src/components/shell/AppShell.jsx
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, Menu, Moon, Search, Sun } from 'lucide-react';
+import { Globe2, Heart, Menu, Moon, Search, Sun } from 'lucide-react';
 import Sidebar from './Sidebar';
 import CommandPalette from './CommandPalette';
 import SupportModal from './SupportModal';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import useScrollLock from '../../hooks/useScrollLock';
+import { useI18n } from '../../i18n';
 
 // Kept in step with the two canvas colours in tokens.css so the mobile browser
 // chrome matches the page instead of framing it in white.
@@ -31,6 +32,7 @@ export default function AppShell({ children, favourites }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const location = useLocation();
+  const { language, setLanguage, languages, t } = useI18n();
 
   useScrollLock(menuOpen || paletteOpen || supportOpen);
 
@@ -71,7 +73,7 @@ export default function AppShell({ children, favourites }) {
   return (
     <div className="shell">
       <a className="skip-link" href="#main">
-        Skip to content
+        {t('app.skipContent')}
       </a>
 
       <div className="ambient" aria-hidden="true">
@@ -89,7 +91,7 @@ export default function AppShell({ children, favourites }) {
             type="button"
             className="icon-btn topbar-menu"
             onClick={() => setMenuOpen(true)}
-            aria-label="Open navigation menu"
+            aria-label={t('app.openNavigation')}
             aria-expanded={menuOpen}
             aria-controls="app-sidebar"
           >
@@ -104,29 +106,43 @@ export default function AppShell({ children, favourites }) {
             type="button"
             className="palette-trigger"
             onClick={() => setPaletteOpen(true)}
-            aria-label="Search tools"
+            aria-label={t('app.searchTools')}
           >
             <Search size={15} />
-            <span>Search tools</span>
+            <span>{t('app.searchTools')}</span>
             <kbd>Ctrl</kbd>
             <kbd>K</kbd>
           </button>
 
           <div className="topbar-actions">
+            <label className="language-select" aria-label={t('language.select')}>
+              <Globe2 size={16} aria-hidden="true" />
+              <span className="sr-only">{t('language.label')}</span>
+              <select
+                value={language}
+                onChange={(event) => setLanguage(event.target.value)}
+                aria-label={t('language.select')}
+              >
+                {languages.map(({ code, name }) => (
+                  <option key={code} value={code}>{name}</option>
+                ))}
+              </select>
+            </label>
+
             <button
               type="button"
               className="ui-btn ui-btn-soft support-btn"
               onClick={() => setSupportOpen(true)}
             >
               <Heart size={15} />
-              <span>Support</span>
+              <span>{t('app.support')}</span>
             </button>
 
             <button
               type="button"
               className="icon-btn"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              aria-label={theme === 'dark' ? t('app.switchToLight') : t('app.switchToDark')}
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -138,14 +154,14 @@ export default function AppShell({ children, favourites }) {
         </main>
 
         <footer className="shell-footer">
-          <span>VoiceForge Creator Toolkit · © {new Date().getFullYear()} Tikri AI</span>
+          <span>{t('app.footerSummary', { year: new Date().getFullYear() })}</span>
           <span className="footer-note">
-            Browser tools process files locally; server tools send input to return results.
+            {t('app.footerPrivacy')}
           </span>
-          <nav className="footer-links" aria-label="Site information">
-            <Link to="/about">About</Link>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
+          <nav className="footer-links" aria-label={t('app.siteInformation')}>
+            <Link to="/about">{t('app.about')}</Link>
+            <Link to="/privacy">{t('app.privacy')}</Link>
+            <Link to="/terms">{t('app.terms')}</Link>
           </nav>
         </footer>
       </div>

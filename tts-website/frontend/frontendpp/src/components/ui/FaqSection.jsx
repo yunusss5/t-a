@@ -7,15 +7,17 @@
 // array — FAQPage markup without visible answers is a schema violation.
 
 import { Panel } from './Primitives';
+import { useI18n } from '../../i18n';
 
-export default function FaqSection({ faqs, title = 'Frequently asked questions' }) {
+export default function FaqSection({ faqs, title }) {
+  const { t } = useI18n();
   if (!faqs?.length) return null;
 
   return (
     <Panel
       className="faq-panel"
-      title={title}
-      hint="Clear answers to common questions about this tool."
+      title={title || t('tool.faq')}
+      hint={t('tool.faqHint')}
     >
       <div className="faq-list">
         {faqs.map(({ question, answer }, index) => (

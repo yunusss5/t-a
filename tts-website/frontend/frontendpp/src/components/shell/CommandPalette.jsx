@@ -6,6 +6,7 @@ import { CornerDownLeft, Search } from 'lucide-react';
 import { searchTools, TOOLS } from '../../tools/registry';
 import { cx } from '../../lib/utils';
 import useFocusTrap from '../../hooks/useFocusTrap';
+import { useI18n } from '../../i18n';
 
 /** Ctrl/⌘+K launcher. Arrow keys move, Enter opens, Escape closes. */
 export default function CommandPalette({ open, onClose }) {
@@ -22,6 +23,7 @@ function PaletteBody({ onClose }) {
   const listRef = useRef(null);
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
+  const { t } = useI18n();
 
   const results = useMemo(() => searchTools(query).slice(0, 8), [query]);
   const activeId = results[cursor] ? `palette-opt-${results[cursor].id}` : undefined;
@@ -92,7 +94,7 @@ function PaletteBody({ onClose }) {
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Search tools"
+        aria-label={t('app.searchTools')}
       >
         <div className="palette-input">
           <Search size={17} aria-hidden="true" />
@@ -102,10 +104,10 @@ function PaletteBody({ onClose }) {
           <input
             ref={inputRef}
             value={query}
-            placeholder={`Search ${TOOLS.length} tools…`}
+            placeholder={t('palette.searchPlaceholder', { count: TOOLS.length })}
             onChange={(event) => search(event.target.value)}
             onKeyDown={handleKeyDown}
-            aria-label="Search tools"
+            aria-label={t('app.searchTools')}
             role="combobox"
             aria-expanded="true"
             aria-controls="palette-results"
@@ -121,10 +123,10 @@ function PaletteBody({ onClose }) {
           className="palette-results"
           id="palette-results"
           role="listbox"
-          aria-label="Tools"
+          aria-label={t('palette.tools')}
           ref={listRef}
         >
-          {results.length === 0 && <p className="palette-empty">No tool matches “{query}”.</p>}
+          {results.length === 0 && <p className="palette-empty">{t('palette.empty', { query })}</p>}
 
           {results.map((tool, index) => {
             const Icon = tool.icon;
@@ -156,7 +158,7 @@ function PaletteBody({ onClose }) {
         </div>
 
         <p className="sr-only" aria-live="polite">
-          {results.length} {results.length === 1 ? 'tool' : 'tools'} found
+          {t('palette.toolFound', { count: results.length })}
         </p>
       </motion.div>
     </motion.div>

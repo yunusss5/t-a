@@ -4,6 +4,7 @@
 import { createContext, useContext, useEffect, useId, useMemo, useRef } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { cx } from '../../lib/utils';
+import { useI18n } from '../../i18n';
 
 /**
  * A glass card. `title`/`hint` render an optional header row.
@@ -88,6 +89,7 @@ export function TextArea({
   'aria-describedby': describedBy,
   ...rest
 }) {
+  const { t } = useI18n();
   const counterId = useId();
   const controlId = useControlId(id);
 
@@ -108,7 +110,7 @@ export function TextArea({
       {counter && (
         <span className="textarea-counter" id={counterId}>
           {value.length.toLocaleString()}
-          {maxLength ? ` / ${maxLength.toLocaleString()}` : ' chars'}
+          {maxLength ? ` / ${maxLength.toLocaleString()}` : t('forms.chars')}
         </span>
       )}
     </div>

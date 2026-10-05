@@ -1,13 +1,15 @@
 import { Panel } from './Primitives';
+import { useI18n } from '../../i18n';
 
-export default function HowToSection({ steps, title = 'How to use this tool' }) {
+export default function HowToSection({ steps, title }) {
+  const { t } = useI18n();
   if (!steps?.length) return null;
 
   return (
     <Panel
       className="how-to-panel"
-      title={title}
-      hint="A simple step-by-step guide to get your result."
+      title={title || t('tool.defaultHowTo')}
+      hint={t('tool.howToHint')}
     >
       <ol className="how-to-list">
         {steps.map((step, index) => (
