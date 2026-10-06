@@ -160,7 +160,10 @@ export default function TextToSpeech() {
 
   return (
     <ToolGrid>
-      <Panel title="Script" hint="Neural voices from Microsoft Edge — free, no API key.">
+      <Panel
+        title="Script"
+        hint="Neural voices from Microsoft Edge — free, no API key. If the free backend has gone idle, wake-up errors retry automatically."
+      >
         <Segmented value={source} onChange={setSource} options={SOURCES} label="Script source" />
 
         {source === 'text' ? (

@@ -61,6 +61,19 @@ describe('getJson', () => {
     await expect(getJson('/voices')).rejects.toMatchObject({ name: 'AbortError' });
   });
 
+  it('retries the voice catalogue while the free backend wakes', async () => {
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation((callback) => {
+      callback();
+      return 0;
+    });
+    fetch
+      .mockResolvedValueOnce(nonJson(503))
+      .mockResolvedValueOnce(reply([{ name: 'en-GB-SoniaNeural' }]));
+
+    await expect(getJson('/voices')).resolves.toEqual([{ name: 'en-GB-SoniaNeural' }]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it('repeats FastAPI’s own detail rather than a status code', async () => {
     fetch.mockResolvedValue(reply({ detail: 'Text is too long.' }, { ok: false, status: 400 }));
 
@@ -77,10 +90,14 @@ describe('getJson', () => {
 
 describe('a host that is asleep rather than broken', () => {
   it.each([502, 503])('explains the ~30 second wake-up on %i', async (status) => {
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation((callback) => {
+      callback();
+      return 0;
+    });
     fetch.mockResolvedValue(nonJson(status));
 
-    // Free hosting spins down when idle, and "Request failed (503)" reads as a
-    // broken app to someone who only needs to press the button again.
+    // Exhaust wake-up retries immediately: this verifies the final explanation
+    // without spending a minute waiting through every retry delay.
     await expect(getJson('/voices')).rejects.toThrow(/waking up/);
   });
 
@@ -122,6 +139,19 @@ describe('form posts', () => {
     const blob = await postFormBlob('/generate', { text: 'hello' });
     expect(blob).toBeInstanceOf(Blob);
     expect(fetch.mock.calls[0][1].method).toBe('POST');
+  });
+
+  it('retries TTS generation after a transient gateway error', async () => {
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation((callback) => {
+      callback();
+      return 0;
+    });
+    fetch
+      .mockResolvedValueOnce(nonJson(503))
+      .mockResolvedValueOnce(reply({ audio: true }));
+
+    await expect(postFormBlob('/generate', { text: 'hello' })).resolves.toBeInstanceOf(Blob);
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it('reports an unreachable backend the same way for a post', async () => {

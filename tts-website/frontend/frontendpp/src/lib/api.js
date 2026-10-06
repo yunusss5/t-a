@@ -6,6 +6,45 @@
 // a dev session talks to a local backend through the vite proxy.
 export const VITE_API_BASE = import.meta.env.VITE_API_BASE ?? 'https://tts-backend-33xv.onrender.com';
 
+const WAKE_RETRY_PATHS = new Set(['/voices', '/generate', '/generate-from-file']);
+const WAKE_RETRY_DELAYS = [3000, 5000, 8000, 12000, 15000, 20000];
+
+function waitForRetry(delay, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason ?? new DOMException('The request was aborted.', 'AbortError'));
+      return;
+    }
+
+    let timeout;
+    const abort = () => {
+      clearTimeout(timeout);
+      signal?.removeEventListener('abort', abort);
+      reject(signal.reason ?? new DOMException('The request was aborted.', 'AbortError'));
+    };
+    const finish = () => {
+      signal?.removeEventListener('abort', abort);
+      resolve();
+    };
+
+    signal?.addEventListener('abort', abort, { once: true });
+    timeout = setTimeout(finish, delay);
+  });
+}
+
+async function fetchWithWakeRetry(path, options) {
+  for (let attempt = 0; ; attempt += 1) {
+    const response = await fetch(`${VITE_API_BASE}${path}`, options);
+    const canRetry =
+      WAKE_RETRY_PATHS.has(path) &&
+      [502, 503, 504].includes(response.status) &&
+      attempt < WAKE_RETRY_DELAYS.length;
+
+    if (!canRetry) return response;
+    await waitForRetry(WAKE_RETRY_DELAYS[attempt], options.signal);
+  }
+}
+
 /**
  * Turn a plain object into FormData. The backend uses `Form(...)` params
  * everywhere, so every request is multipart — including file uploads, where a
@@ -32,7 +71,7 @@ async function readError(response) {
     // Non-JSON error body (gateway timeout pages, etc.) — fall through.
   }
 
-  if (response.status === 502 || response.status === 503) {
+  if ([502, 503, 504].includes(response.status)) {
     return 'The API is waking up (free hosting sleeps when idle). Try again in ~30 seconds.';
   }
 
@@ -44,7 +83,10 @@ export async function postForm(path, payload) {
   let response;
 
   try {
-    response = await fetch(`${VITE_API_BASE}${path}`, { method: 'POST', body: toFormData(payload) });
+    response = await fetch(`${VITE_API_BASE}${path}`, {
+      method: 'POST',
+      body: toFormData(payload),
+    });
   } catch (error) {
     throw new Error('Could not reach the API. Check your connection or the backend URL.', {
       cause: error,
@@ -60,7 +102,10 @@ export async function postFormBlob(path, payload) {
   let response;
 
   try {
-    response = await fetch(`${VITE_API_BASE}${path}`, { method: 'POST', body: toFormData(payload) });
+    response = await fetchWithWakeRetry(path, {
+      method: 'POST',
+      body: toFormData(payload),
+    });
   } catch (error) {
     throw new Error('Could not reach the API. Check your connection or the backend URL.', {
       cause: error,
@@ -83,7 +128,7 @@ export async function getJson(path, { signal } = {}) {
   let response;
 
   try {
-    response = await fetch(`${VITE_API_BASE}${path}`, { signal });
+    response = await fetchWithWakeRetry(path, { signal });
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
     throw new Error('Could not reach the API. Check your connection or the backend URL.', {
