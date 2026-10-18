@@ -18,7 +18,7 @@ export default function SupportModal({ open, onClose }) {
     >
       <div className="qr-block">
         <img
-          src="/qr-support.png"
+          src="#"
           alt={`${t('support.upiId')} QR code`}
           width="168"
           height="168"
