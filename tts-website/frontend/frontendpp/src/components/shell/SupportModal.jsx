@@ -4,7 +4,7 @@ import Modal from '../ui/Modal';
 import { copyText } from '../../lib/utils';
 import { useI18n } from '../../i18n';
 
-//const UPI_ID = 'gause700ybl';
+const UPI_ID = 'coming soon';
 
 /** Donation details. All dialog behaviour lives in the shared Modal. */
 export default function SupportModal({ open, onClose }) {
